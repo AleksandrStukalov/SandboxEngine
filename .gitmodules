@@ -1,0 +1,3 @@
+[submodule "SandboxEngine/dependencies/glfw"]
+	path = SandboxEngine/dependencies/glfw
+	url = https://github.com/glfw/glfw.git
