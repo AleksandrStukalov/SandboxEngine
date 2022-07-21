@@ -34,3 +34,4 @@ if(NOT EXISTS "${PROJECT_SOURCE_DIR}/SandboxEngine/dependencies/glfw/CMakeLists.
 endif()
 
 add_subdirectory("SandboxEngine/dependencies/glfw")
+add_subdirectory("SandboxEngine/dependencies/glad")

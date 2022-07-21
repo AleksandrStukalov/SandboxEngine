@@ -34,14 +34,16 @@ target_include_directories(${ENGINE_NAME}
     PRIVATE
         "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/"
         "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/glfw/include/"
+        "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/glad/include/"
 )
 
 target_link_directories(${ENGINE_NAME}
     PRIVATE 
         "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/glfw/src/"
+        "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/glad/"
 )
 
-target_link_libraries(${ENGINE_NAME} glfw)
+target_link_libraries(${ENGINE_NAME} glfw glad)
 
 target_precompile_headers(${ENGINE_NAME}
     PRIVATE
