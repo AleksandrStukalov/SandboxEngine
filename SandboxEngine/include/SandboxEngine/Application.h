@@ -2,12 +2,14 @@
 
 namespace SE
 {
-    struct Application
+    class Application
     {
-        
+    public:
+        Application();
+        ~Application();
         void update();
-        virtual void onUpdate() = 0;
-
+    protected:
+        virtual void onUpdate();
     };
 }
 
