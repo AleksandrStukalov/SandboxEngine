@@ -1,15 +1,28 @@
 #pragma once
 
+#include "Window.h"
+
 namespace SE
 {
     class Application
     {
     public:
-        Application();
-        ~Application();
-        void update();
+        inline Application(const char* title = "Application", const unsigned int width = 800, const unsigned int height = 600)
+            : window(title, width, height) {}
+        inline void update()
+        {
+            while (!window.shouldClose())
+            {
+                onUpdate();
+
+                window.swapBuffers();
+            }
+        }
+
+        Window window;
+
     protected:
-        virtual void onUpdate();
+        virtual void onUpdate() = 0;
     };
 }
 

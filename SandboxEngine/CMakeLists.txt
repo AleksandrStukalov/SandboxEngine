@@ -8,8 +8,17 @@ FILE(GLOB INCLUDE
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/**.h"
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/**.cpp"
 )
+FILE(GLOB GLFW
+    "${CMAKE_SOURCE_DIR}/SandboxEngine/src/Platform/GLFW/**.h"
+    "${CMAKE_SOURCE_DIR}/SandboxEngine/src/Platform/GLFW/**.cpp"
+)
+FILE(GLOB OPENGL
+    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/src/Platform/OpenGL/**.h"
+    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/src/Platform/OpenGL/**.cpp"
+)
 FILE(GLOB SRC
-    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/src/**.cpp"
+    ${GLFW}
+    ${OPENGL}
 )
 add_library(${ENGINE_NAME} 
     STATIC
@@ -17,8 +26,8 @@ add_library(${ENGINE_NAME}
         ${INCLUDE}
 )
 
+source_group("src" FILES  ${SRC})
 source_group("include" FILES  ${INCLUDE})
-source_group("src"     FILES  ${SRC})
 
 target_compile_features(${ENGINE_NAME} PUBLIC cxx_std_17)
 
