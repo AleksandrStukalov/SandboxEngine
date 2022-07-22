@@ -1,6 +1,7 @@
 #pragma once
 
-namespace SE {
+namespace SE
+{
     class GLFWContext
     {
     public:

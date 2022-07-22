@@ -24,6 +24,7 @@ namespace SE
         {
             message.insert(message.begin(), "Error: ");
             print(message);
+            __debugbreak();
         }
 
     private:

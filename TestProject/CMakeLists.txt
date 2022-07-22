@@ -13,6 +13,12 @@ add_executable(${EXE_NAME}
 source_group("src"  FILES  ${SRC})
 
 target_compile_features(${EXE_NAME} PUBLIC cxx_std_17)
+
+target_compile_options(${EXE_NAME} 
+    PRIVATE
+        "/W0"
+)
+
 set_target_properties(${EXE_NAME} 
     PROPERTIES
         LINKER_LANGUAGE CXX

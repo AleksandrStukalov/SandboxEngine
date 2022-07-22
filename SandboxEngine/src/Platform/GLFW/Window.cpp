@@ -1,4 +1,5 @@
 #include "Window.h"
+#include "Application.h"
 #include "GLFWContext.h"
 
 #define GLFW_INCLUDE_NONE
@@ -7,6 +8,7 @@
 SE::Window::Window(const char* title, const unsigned int width, const unsigned int height)
     : width(width), height(height)
 {
+    // Initializing GLFW:
     SE::GLFWContext::init();
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);

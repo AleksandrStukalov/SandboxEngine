@@ -1,0 +1,104 @@
+#include "Events.h"
+#include "Application.h"
+
+#include <GLFW/glfw3.h>
+
+void SE::Events::poll() { glfwPollEvents(); }
+
+// Callbacks:
+void errorCallback(int error_code, const char* description)
+{
+    SE::Log::error({ "GLFW: ", description });
+}
+void keyCallback(GLFWwindow* handle, int key, int scancode, int action, int mods)
+{
+    SE::Application& application = *(SE::Application*)(glfwGetWindowUserPointer(handle));
+    SE::Events& events = application.events;
+
+    if (action == GLFW_PRESS)
+    {
+        // Toggling keys:
+        bool& state = events.toggleKeys[(int)SE::getSEKey(key)];
+        state = !state;
+    }
+
+}
+bool SE::Events::isKey(SE::Key key, SE::KeyAction action)
+{
+    GLFWwindow* window = (GLFWwindow*)application.window.handle;
+    switch (action)
+    {
+    case SE::KeyAction::PRESSED:
+        return glfwGetKey(window, SE::getPlatformKey(key)) == GLFW_PRESS;
+    case SE::KeyAction::RELEASED:
+        return glfwGetKey(window, SE::getPlatformKey(key)) == GLFW_RELEASE;
+    case SE::KeyAction::TOGGLE:
+        return toggleKeys[(int)key];
+    default:
+        SE::Log::error({ "Unsupported key action" });
+    }
+}
+void mouseButtonCallback(GLFWwindow* handle, int button, int action, int mods)
+{
+    SE::Application& application = *(SE::Application*)(glfwGetWindowUserPointer(handle));
+    SE::Events& events = application.events;
+
+    if (action == GLFW_PRESS)
+    {
+        // Toggling mouse buttons:
+        bool& state = events.toggleMouseButtons[(int)SE::getSEMouseButton(button)];
+        state = !state;
+    }
+}
+bool SE::Events::isMouseButton(SE::MouseButton mouseButton, SE::KeyAction action)
+{
+    GLFWwindow* window = (GLFWwindow*)application.window.handle;
+    switch (action)
+    {
+    case SE::KeyAction::PRESSED:
+        return glfwGetMouseButton(window, SE::getPlatformMouseButton(mouseButton)) == GLFW_PRESS;
+    case SE::KeyAction::RELEASED:
+        return glfwGetMouseButton(window, SE::getPlatformMouseButton(mouseButton)) == GLFW_RELEASE;
+    case SE::KeyAction::TOGGLE:
+        return toggleMouseButtons[(int)mouseButton];
+    default:
+        SE::Log::error({ "Unsupported mouse button action" });
+    }
+}
+bool justEntered = true;// For checking whether or not cursor just entered window borders
+float lastX = 0.0f, lastY = 0.0f;
+void cursorPosCallback(GLFWwindow* handle, double xpos, double ypos)
+{
+    SE::Application& application = *(SE::Application*)glfwGetWindowUserPointer(handle);
+
+    if (justEntered)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        justEntered = false;
+    }
+    // NOTE: It's needed to circumvent sudden jump of the offset, when cursor enters window borders.
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    application.processMouseMovement(xoffset, yoffset);
+}
+
+SE::Events::Events(SE::Application& application)
+    : application(application)
+{
+    // Clearing toggle keys:
+    for (bool& key : toggleKeys) { key = false; }
+
+    GLFWwindow* window = (GLFWwindow*)application.window.handle;
+    glfwSetWindowUserPointer(window, &application);
+
+    // Setting callbacks:
+    glfwSetErrorCallback(errorCallback);
+    glfwSetKeyCallback(window, keyCallback);
+    glfwSetMouseButtonCallback(window, mouseButtonCallback);
+    glfwSetCursorPosCallback(window, cursorPosCallback);
+}
