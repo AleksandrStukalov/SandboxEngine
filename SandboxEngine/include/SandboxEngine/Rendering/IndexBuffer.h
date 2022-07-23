@@ -11,7 +11,7 @@ namespace SE
         void bind();
 
         SE::Type type;
-        unsigned int vertexCount;
+        unsigned int vertexCount;// For keeping count of vertices, when index buffer is used
     private:
         unsigned int id;
     };

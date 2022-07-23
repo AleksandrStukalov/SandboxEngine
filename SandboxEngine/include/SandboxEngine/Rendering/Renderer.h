@@ -16,6 +16,7 @@ namespace SE
 
     class VertexArray;
     class IndexBuffer;
+    class Shader;
 
     class Renderer
     {
@@ -25,7 +26,7 @@ namespace SE
         void viewport(int x, int y, int width, int height);
         void setPolygonMode(PolygonMode mode) const;
 
-        void draw(VertexArray& va, DrawMode mode = DrawMode::TRIANGLES);
-        void draw(VertexArray& va, IndexBuffer& ib, DrawMode mode = DrawMode::TRIANGLES);
+        void draw(VertexArray& va, Shader& shader, DrawMode mode = DrawMode::TRIANGLES);
+        void draw(VertexArray& va, IndexBuffer& ib, Shader& shader, DrawMode mode = DrawMode::TRIANGLES);
     };
 }
