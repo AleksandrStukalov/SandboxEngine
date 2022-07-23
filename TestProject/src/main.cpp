@@ -6,7 +6,6 @@
 #include <sstream>
 #include <memory>
 
-unsigned int vb, va;
 
 class App : public SE::Application
 {
@@ -17,13 +16,21 @@ public:
     {
         float vertices[]
         {
-            -0.5f, -0.5f, 0.0f,  // Left
-             0.0f, 0.5f, 0.0f,   // Top
-             0.5f, -0.5f, 0.0f   // Right
+            -0.5f, -0.5f, 0.0f,   // Bottom left
+             -0.5f, 0.5f, 0.0f,   // Top left
+             0.5f, 0.5f, 0.0f,    // Top right
+             0.5f, -0.5f, 0.0f    // Bottom right
         };
 
-        vb.reset(new SE::VertexBuffer(vertices, sizeof(vertices)));
+        unsigned int indices[]
+        { 
+            0,1,2,
+            2,3,0 
+        };
 
+
+        vb.reset(new SE::VertexBuffer(vertices, sizeof(vertices)));
+        ib.reset(new SE::IndexBuffer(indices, SE::UNSIGNED_INT, sizeof(indices)));
         va.reset(new SE::VertexArray());
 
         SE::VertexAttribute positions(3, SE::FLOAT);
@@ -52,7 +59,7 @@ public:
 
         renderer.clear(0.2f, 0.2f, 0.2f);
 
-        renderer.draw(*va.get());
+        renderer.draw(*va.get(), *ib.get());
 
     }
 
@@ -68,6 +75,7 @@ public:
 
     std::unique_ptr<SE::VertexBuffer> vb;
     std::unique_ptr<SE::VertexArray> va;
+    std::unique_ptr<SE::IndexBuffer> ib;
 };
 
 int main()

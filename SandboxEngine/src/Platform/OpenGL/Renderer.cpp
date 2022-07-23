@@ -48,3 +48,10 @@ void SE::Renderer::draw(VertexArray& va, DrawMode mode)
     glDrawArrays(getOpenGLMode(mode), 0, va.vertexCount);
 }
 
+void SE::Renderer::draw(VertexArray& va, IndexBuffer& ib, DrawMode mode)
+{
+    va.bind();
+    ib.bind();
+    glDrawElements(getOpenGLMode(mode), ib.vertexCount, SE::getPlatformType(ib.type), 0);
+}
+
