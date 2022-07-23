@@ -63,9 +63,6 @@ public:
     {
         if (events.isKey(SE::Key::A, SE::Action::PRESSED)) SE::Log::info({ "A pressed" });
         if (events.isMouseButton(SE::MouseButton::LEFT, SE::Action::PRESSED)) SE::Log::info({ "LMB" });
-        float scalar(0.025f);
-        if (events.isKey(SE::Key::W, SE::Action::PRESSED)) mixValue += scalar;
-        if (events.isKey(SE::Key::S, SE::Action::PRESSED)) mixValue -= scalar;
         shader->setUniform(SE::FLOAT, "mixValue", (void*)&mixValue);
 
         renderer.clear(0.2f, 0.2f, 0.2f);
@@ -83,6 +80,12 @@ public:
         message << "\t yoffset: ";
         message << yoffset;
         SE::Log::info({ message.str() });
+    }
+
+    void processScroll(float offset) override
+    {
+        float scalar(0.05f);
+        mixValue += offset * scalar;
     }
 
     std::unique_ptr<SE::VertexBuffer> vb;

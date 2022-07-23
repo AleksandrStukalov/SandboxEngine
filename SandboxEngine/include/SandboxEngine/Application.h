@@ -26,6 +26,7 @@ namespace SE
         }
 
         virtual void processMouseMovement(float xoffset, float yoffset) = 0;
+        virtual void processScroll(float offset) = 0;
 
         Window window;
         Events events;

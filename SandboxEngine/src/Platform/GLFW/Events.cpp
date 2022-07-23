@@ -71,17 +71,17 @@ bool SE::Events::isMouseButton(SE::MouseButton mouseButton, SE::Action action)
         SE::Log::error({ "Unsupported mouse button action" });
     }
 }
-bool justEntered = true;// For checking whether or not cursor just entered window borders
-float lastX = 0.0f, lastY = 0.0f;
+bool firstCursorPos(true);// For checking whether or not cursor just entered window borders
+float lastX(0.0f), lastY(0.0f);
 void cursorPosCallback(GLFWwindow* handle, double xpos, double ypos)
 {
     SE::Application& application = *(SE::Application*)glfwGetWindowUserPointer(handle);
 
-    if (justEntered)
+    if (firstCursorPos)
     {
         lastX = xpos;
         lastY = ypos;
-        justEntered = false;
+        firstCursorPos = false;
     }
     // NOTE: It's needed to circumvent sudden jump of the offset, when cursor enters window borders.
 
@@ -91,6 +91,11 @@ void cursorPosCallback(GLFWwindow* handle, double xpos, double ypos)
     lastY = ypos;
 
     application.processMouseMovement(xoffset, yoffset);
+}
+void scrollCallback(GLFWwindow* handle, double xoffset, double yoffset)
+{
+    SE::Application& application = *(SE::Application*)glfwGetWindowUserPointer(handle);
+    application.processScroll(yoffset);
 }
 
 SE::Events::Events(SE::Application& application)
@@ -108,4 +113,5 @@ SE::Events::Events(SE::Application& application)
     glfwSetKeyCallback(window, keyCallback);
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
     glfwSetCursorPosCallback(window, cursorPosCallback);
+    glfwSetScrollCallback(window, scrollCallback);
 }
