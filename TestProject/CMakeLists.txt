@@ -2,15 +2,21 @@ cmake_minimum_required(VERSION 3.24)
 
 set(EXE_NAME "TestProject")
 
+FILE(GLOB SHADERS
+    "${CMAKE_SOURCE_DIR}/${EXE_NAME}/src/shaders/**.vert"
+    "${CMAKE_SOURCE_DIR}/${EXE_NAME}/src/shaders/**.frag"
+)
 FILE(GLOB SRC 
-    "${CMAKE_SOURCE_DIR}/${EXE_NAME}/src/**.cpp"
     "${CMAKE_SOURCE_DIR}/${EXE_NAME}/src/**.h"
+    "${CMAKE_SOURCE_DIR}/${EXE_NAME}/src/**.cpp"
 )
 add_executable(${EXE_NAME}
     ${SRC}
+    ${SHADERS}
 )
 
 source_group("src"  FILES  ${SRC})
+source_group("shaders" FILES ${SHADERS})
 
 target_compile_features(${EXE_NAME} PUBLIC cxx_std_17)
 

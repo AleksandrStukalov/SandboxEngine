@@ -1,4 +1,4 @@
-#version 410 core
+#version 330 core
 
 in vec3 color;
 in vec2 texPos;
@@ -12,6 +12,5 @@ uniform float mixValue;
 void main()
 {
     //outColor = mix(texture(u_texture1, texPos), texture(u_texture2, texPos), mixValue);// * vec4(color, 1.0);
-
     outColor = mix(texture(u_texture1, texPos), texture(u_texture2, texPos), mixValue);
 }

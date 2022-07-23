@@ -18,9 +18,14 @@ FILE(GLOB OPENGL
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/src/Platform/OpenGL/**.h"
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/src/Platform/OpenGL/**.cpp"
 )
+FILE(GLOB IMGUI
+    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/imgui/**.h"
+    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/imgui/**.cpp"
+)
 FILE(GLOB SRC
     ${GLFW}
     ${OPENGL}
+    ${IMGUI}
 )
 add_library(${ENGINE_NAME} 
     STATIC
@@ -44,6 +49,7 @@ set_target_properties(${ENGINE_NAME}
 target_include_directories(${ENGINE_NAME} 
     PUBLIC
         "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/"
+        "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/imgui/"
     PRIVATE
         "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/"
         "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/glfw/include/"
@@ -62,7 +68,7 @@ target_link_libraries(${ENGINE_NAME} "glfw" "glad")
 target_precompile_headers(${ENGINE_NAME}
     PRIVATE
         [["Log.h"]]
-        [["SandboxEngine/Input.h"]]
+        [["Input.h"]]
         [["Types.h"]]
         
         # NOTE: 

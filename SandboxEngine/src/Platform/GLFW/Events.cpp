@@ -13,7 +13,8 @@ void errorCallback(int error_code, const char* description)
 void framebufferSizeCallback(GLFWwindow* handle, int width, int height)
 {
     SE::Application& application = *static_cast<SE::Application*>(glfwGetWindowUserPointer(handle));
-
+    application.window.width = width;
+    application.window.height = height;
     application.renderer.viewport(0, 0, width, height);
 }
 void keyCallback(GLFWwindow* handle, int key, int scancode, int action, int mods)

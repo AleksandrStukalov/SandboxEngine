@@ -1,6 +1,11 @@
 #include "SandboxEngine.h"
 
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 #include <iostream>
 #include <sstream>
@@ -52,34 +57,63 @@ public:
 
         va.get()->add(*vb.get(), layout);
 
+
+        // Setting up ImGui context:
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+        ImGui::StyleColorsDark();
+
+        // Initializing ImGui for our platform:
+        ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)window.handle, true);
+        ImGui_ImplOpenGL3_Init("#version 330");
     }
 
     ~App()
     {
-       
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
     }
 
     void onUpdate() override
     {
-        if (events.isKey(SE::Key::A, SE::Action::PRESSED)) SE::Log::info({ "A pressed" });
-        if (events.isMouseButton(SE::MouseButton::LEFT, SE::Action::PRESSED)) SE::Log::info({ "LMB" });
+       
+        std::stringstream size;
+        size << "Window size: " << window.width <<  " x "  << window.height;
+        SE::Log::info({ size.str() });
+
         shader->setUniform(SE::FLOAT, "mixValue", (void*)&mixValue);
 
         renderer.clear(0.2f, 0.2f, 0.2f);
 
+
+        // Starting imgui frame:
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        {
+            ImGui::Begin("##");
+
+            ImGui::SliderFloat("Mix value", &mixValue, 0, 1);
+
+            ImGui::End();
+        }
+        ImGui::Render();
+
+
         std::vector<SE::Texture*> textures{ texture1.get(), texture2.get() };
         renderer.draw(*va.get(), *ib.get(), *shader.get(), textures);
+
+
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     }
 
     void processMouseMovement(float xoffset, float yoffset) override
     {
-        std::stringstream message; 
-        message << "xoffset: "; 
-        message << xoffset;
-        message << "\t yoffset: ";
-        message << yoffset;
-        SE::Log::info({ message.str() });
+        
     }
 
     void processScroll(float offset) override
