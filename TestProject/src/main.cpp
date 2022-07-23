@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <memory>
 
 unsigned int vb, va;
 
@@ -21,9 +22,7 @@ public:
              0.5f, -0.5f, 0.0f   // Right
         };
 
-        glGenBuffers(1, &vb);
-        glBindBuffer(GL_ARRAY_BUFFER, vb);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+        vb.reset(new SE::VertexBuffer(positions, sizeof(positions)));
 
         glGenVertexArrays(1, &va);
         glBindVertexArray(va);
@@ -34,7 +33,6 @@ public:
 
     ~App()
     {
-        glDeleteBuffers(1, &vb);
         glDeleteVertexArrays(1, &va);
     }
 
@@ -64,6 +62,8 @@ public:
         message << yoffset;
         SE::Log::info({ message.str() });
     }
+
+    std::unique_ptr<SE::VertexBuffer> vb;
 };
 
 int main()
