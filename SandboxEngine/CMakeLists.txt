@@ -62,6 +62,7 @@ target_precompile_headers(${ENGINE_NAME}
     PRIVATE
         [["Log.h"]]
         [["SandboxEngine/Input.h"]]
+        [["Types.h"]]
         
         # NOTE: 
         # Header file names specified with angle brackets (e.g. <unordered_map>) or explicit double quotes, e.g. [["other_header.h"]]) will be treated as is,  and include directories must be available for the compiler to find them. 

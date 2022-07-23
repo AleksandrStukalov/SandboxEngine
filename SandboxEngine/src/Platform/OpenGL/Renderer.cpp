@@ -1,4 +1,4 @@
-#include "Rendering/Renderer.h"
+#include "Rendering.h"
 #include "OpenGLContext.h"
 
 #include <glad/glad.h>
@@ -25,7 +25,7 @@ unsigned int getOpenGLMode(SE::DrawMode mode)
 {
     switch (mode)
     {
-    case SE::TRIANGLES:             return GL_TRIANGLES;
+    case SE::DrawMode::TRIANGLES:   return GL_TRIANGLES;
     case SE::DrawMode::LINES:       return GL_LINES;
     case SE::DrawMode::POINTS:      return GL_POINTS;
     default:                        SE::Log::error({ "Unsupported drawing mode" }); return -1;
@@ -40,5 +40,11 @@ void SE::Renderer::setPolygonMode(PolygonMode mode) const
         case SE::PolygonMode::WIREFRAME:    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); break;
         default:                            SE::Log::error({ "Unsupported mode" });
     }
+}
+
+void SE::Renderer::draw(VertexArray& va, DrawMode mode)
+{
+    va.bind();
+    glDrawArrays(getOpenGLMode(mode), 0, va.vertexCount);
 }
 

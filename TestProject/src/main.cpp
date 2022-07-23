@@ -15,25 +15,28 @@ public:
     App()
         : Application("App", 800, 600)
     {
-        float positions[]
+        float vertices[]
         {
             -0.5f, -0.5f, 0.0f,  // Left
              0.0f, 0.5f, 0.0f,   // Top
              0.5f, -0.5f, 0.0f   // Right
         };
 
-        vb.reset(new SE::VertexBuffer(positions, sizeof(positions)));
+        vb.reset(new SE::VertexBuffer(vertices, sizeof(vertices)));
 
-        glGenVertexArrays(1, &va);
-        glBindVertexArray(va);
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(float) * 3, (void*)0);
-        glEnableVertexAttribArray(0);
+        va.reset(new SE::VertexArray());
+
+        SE::VertexAttribute positions(3, SE::FLOAT);
+        SE::VertexBufferLayout layout;
+        layout.add(positions);
+
+        va.get()->add(*vb.get(), layout);
 
     }
 
     ~App()
     {
-        glDeleteVertexArrays(1, &va);
+       
     }
 
     void onUpdate() override
@@ -49,7 +52,7 @@ public:
 
         renderer.clear(0.2f, 0.2f, 0.2f);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        renderer.draw(*va.get());
 
     }
 
@@ -64,6 +67,7 @@ public:
     }
 
     std::unique_ptr<SE::VertexBuffer> vb;
+    std::unique_ptr<SE::VertexArray> va;
 };
 
 int main()
