@@ -7,6 +7,8 @@ FILE(GLOB INCLUDE
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/**.cpp"
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/**.h"
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/**.cpp"
+    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/Rendering/**.h"
+    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/Rendering/**.cpp"
 )
 FILE(GLOB GLFW
     "${CMAKE_SOURCE_DIR}/SandboxEngine/src/Platform/GLFW/**.h"
@@ -31,10 +33,7 @@ source_group("include" FILES  ${INCLUDE})
 
 target_compile_features(${ENGINE_NAME} PUBLIC cxx_std_17)
 
-target_compile_options(${ENGINE_NAME}
-    PRIVATE
-        "/W0"
-)
+target_compile_options(${ENGINE_NAME} PRIVATE "/W0")
 
 set_target_properties(${ENGINE_NAME} 
     PROPERTIES 
@@ -57,7 +56,7 @@ target_link_directories(${ENGINE_NAME}
         "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/glad/"
 )
 
-target_link_libraries(${ENGINE_NAME} glfw glad)
+target_link_libraries(${ENGINE_NAME} "glfw" "glad")
 
 target_precompile_headers(${ENGINE_NAME}
     PRIVATE

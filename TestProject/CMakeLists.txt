@@ -14,10 +14,7 @@ source_group("src"  FILES  ${SRC})
 
 target_compile_features(${EXE_NAME} PUBLIC cxx_std_17)
 
-target_compile_options(${EXE_NAME} 
-    PRIVATE
-        "/W0"
-)
+target_compile_options(${EXE_NAME} PRIVATE "/W0")
 
 set_target_properties(${EXE_NAME} 
     PROPERTIES
@@ -28,11 +25,15 @@ set_target_properties(${EXE_NAME}
 target_include_directories(${EXE_NAME}
     PRIVATE
         "${CMAKE_SOURCE_DIR}/SandboxEngine/include/"
+        "${CMAKE_SOURCE_DIR}/SandboxEngine/dependencies/glfw/include/"
+        "${CMAKE_SOURCE_DIR}/SandboxEngine/dependencies/glad/include/"
 )
 
 target_link_directories(${EXE_NAME}
     PRIVATE
         "${CMAKE_SOURCE_DIR}/SandboxEngine/"
+        "${CMAKE_SOURCE_DIR}/SandboxEngine/dependencies/glfw/src/"
+        "${CMAKE_SOURCE_DIR}/SandboxEngine/dependencies/glad/"
 )
 
-target_link_libraries(${EXE_NAME} SandboxEngine)
+target_link_libraries(${EXE_NAME} "SandboxEngine" "glfw" "glad")

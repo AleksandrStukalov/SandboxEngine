@@ -2,6 +2,7 @@
 
 #include "Window.h"
 #include "Events.h"
+#include "Rendering/Renderer.h"
 
 namespace SE
 {
@@ -14,6 +15,9 @@ namespace SE
         {
             while (!window.shouldClose())
             {
+                if (events.isKey(SE::Key::ONE, SE::Action::PRESSED)) renderer.setPolygonMode(SE::PolygonMode::STANDARD);
+                if (events.isKey(SE::Key::TWO, SE::Action::PRESSED)) renderer.setPolygonMode(SE::PolygonMode::WIREFRAME);
+
                 onUpdate();
 
                 window.swapBuffers();
@@ -25,6 +29,7 @@ namespace SE
 
         Window window;
         Events events;
+        Renderer renderer;
 
     protected:
         virtual void onUpdate() = 0;

@@ -162,7 +162,7 @@ namespace SE
         UP,
         DOWN
     };
-    enum class KeyAction
+    enum class Action
     {
         PRESSED,
         RELEASED,

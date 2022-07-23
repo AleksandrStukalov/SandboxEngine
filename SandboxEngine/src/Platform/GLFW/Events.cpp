@@ -10,6 +10,12 @@ void errorCallback(int error_code, const char* description)
 {
     SE::Log::error({ "GLFW: ", description });
 }
+void framebufferSizeCallback(GLFWwindow* handle, int width, int height)
+{
+    SE::Application& application = *static_cast<SE::Application*>(glfwGetWindowUserPointer(handle));
+
+    application.renderer.viewport(0, 0, width, height);
+}
 void keyCallback(GLFWwindow* handle, int key, int scancode, int action, int mods)
 {
     SE::Application& application = *(SE::Application*)(glfwGetWindowUserPointer(handle));
@@ -23,16 +29,16 @@ void keyCallback(GLFWwindow* handle, int key, int scancode, int action, int mods
     }
 
 }
-bool SE::Events::isKey(SE::Key key, SE::KeyAction action)
+bool SE::Events::isKey(SE::Key key, SE::Action action)
 {
     GLFWwindow* window = (GLFWwindow*)application.window.handle;
     switch (action)
     {
-    case SE::KeyAction::PRESSED:
+    case SE::Action::PRESSED:
         return glfwGetKey(window, SE::getPlatformKey(key)) == GLFW_PRESS;
-    case SE::KeyAction::RELEASED:
+    case SE::Action::RELEASED:
         return glfwGetKey(window, SE::getPlatformKey(key)) == GLFW_RELEASE;
-    case SE::KeyAction::TOGGLE:
+    case SE::Action::TOGGLE:
         return toggleKeys[(int)key];
     default:
         SE::Log::error({ "Unsupported key action" });
@@ -50,16 +56,16 @@ void mouseButtonCallback(GLFWwindow* handle, int button, int action, int mods)
         state = !state;
     }
 }
-bool SE::Events::isMouseButton(SE::MouseButton mouseButton, SE::KeyAction action)
+bool SE::Events::isMouseButton(SE::MouseButton mouseButton, SE::Action action)
 {
     GLFWwindow* window = (GLFWwindow*)application.window.handle;
     switch (action)
     {
-    case SE::KeyAction::PRESSED:
+    case SE::Action::PRESSED:
         return glfwGetMouseButton(window, SE::getPlatformMouseButton(mouseButton)) == GLFW_PRESS;
-    case SE::KeyAction::RELEASED:
+    case SE::Action::RELEASED:
         return glfwGetMouseButton(window, SE::getPlatformMouseButton(mouseButton)) == GLFW_RELEASE;
-    case SE::KeyAction::TOGGLE:
+    case SE::Action::TOGGLE:
         return toggleMouseButtons[(int)mouseButton];
     default:
         SE::Log::error({ "Unsupported mouse button action" });
@@ -98,6 +104,7 @@ SE::Events::Events(SE::Application& application)
 
     // Setting callbacks:
     glfwSetErrorCallback(errorCallback);
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     glfwSetKeyCallback(window, keyCallback);
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
     glfwSetCursorPosCallback(window, cursorPosCallback);

@@ -12,8 +12,8 @@ namespace SE
 
         void poll();
 
-        bool isKey(SE::Key, SE::KeyAction action);
-        bool isMouseButton(SE::MouseButton mouseButton, SE::KeyAction action);
+        bool isKey(SE::Key, SE::Action action);
+        bool isMouseButton(SE::MouseButton mouseButton, SE::Action action);
 
 
         bool toggleKeys[120];
