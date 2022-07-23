@@ -5,3 +5,4 @@
 #include "Rendering/VertexArray.h"
 #include "Rendering/IndexBuffer.h"
 #include "Rendering/Shader.h"
+#include "Rendering/Texture.h"
