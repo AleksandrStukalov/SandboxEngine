@@ -48,6 +48,7 @@ target_include_directories(${ENGINE_NAME}
         "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/"
         "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/glfw/include/"
         "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/glad/include/"
+        "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/stb/"
 )
 
 target_link_directories(${ENGINE_NAME}
