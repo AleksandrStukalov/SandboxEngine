@@ -17,7 +17,7 @@ void SE::Shader::setUniform(SE::Type type, std::string name, void* data)
     case SE::UNSIGNED_INT:  glUniform1ui(location, *(unsigned int*)data);               break;
     case SE::FLOAT_VEC2:    glUniform2fv(location, 1, (float*)data);                    break;
     case SE::FLOAT_VEC3:    glUniform3fv(location, 1, (float*)data);                    break;
-    case SE::MAT4:          glUniformMatrix4fv(location, 1, GL_FALSE, (float*)data);    break;
+    case SE::MAT4F:          glUniformMatrix4fv(location, 1, GL_FALSE, (float*)data);    break;
     default: SE::Log::error({ "Unsupported uniform type" });
     }
     // NOTE: for glUniform{...}f count parameter is how many instances of vector, matrices or whatever we want to send, 

@@ -9,12 +9,14 @@
 #include <iostream>
 #include <sstream>
 #include <memory>
+#include <cmath>
 
 
 
 float mixValue(0.5f);
 SE::Vec2f position(0.0f);
 float size(0.5f);
+float radians(0.0f);
 
 struct Vertex
 {
@@ -96,15 +98,20 @@ public:
                         0.0f, size, 0.0f, 0.0f,
                         0.0f, 0.0f, 1.0f, 0.0f,
                         0.0f, 0.0f, 0.0f, 1.0f);
-        shader->setUniform(SE::MAT4, "u_scale", (void*)&scale);
+        shader->setUniform(SE::MAT4F, "u_scale", (void*)&scale);
 
         SE::Mat4f translation(1.0f, 0.0f, 0.0f, position.x,
                               0.0f, 1.0f, 0.0f, position.y,
                               0.0f, 0.0f, 1.0f, 0.0f,
                               0.0f, 0.0f, 0.0f, 1.0f);
         translation.transpose();
-        shader->setUniform(SE::MAT4, "u_translation", (void*)&translation);
+        shader->setUniform(SE::MAT4F, "u_translation", (void*)&translation);
 
+        SE::Mat4f rotation(std::cos(radians), -std::sin(radians), 0.0f, 0.0f,
+                           std::sin(radians), std::cos(radians), 0.0f, 0.0f,
+                           0.0f, 0.0f, 1.0f, 0.0f,
+                           0.0f, 0.0f, 0.0f, 1.0f);
+        shader->setUniform(SE::MAT4F, "u_rotation", (void*)&rotation);
 
         renderer.clear(0.2f, 0.2f, 0.2f);
 
@@ -134,10 +141,16 @@ public:
     void processKeyboard() override
     {
         float scalar(0.05);
+
+        // Translation:
         if (events.isKey(SE::Key::W, SE::Action::PRESSED)) position.y += scalar;
         if (events.isKey(SE::Key::A, SE::Action::PRESSED)) position.x -= scalar;
         if (events.isKey(SE::Key::S, SE::Action::PRESSED)) position.y -= scalar;
         if (events.isKey(SE::Key::D, SE::Action::PRESSED)) position.x += scalar;
+
+        // Rotation:
+        if (events.isKey(SE::Key::Q, SE::Action::PRESSED)) radians -= scalar;
+        if (events.isKey(SE::Key::E, SE::Action::PRESSED)) radians += scalar;
     }
     void processMouseMovement(float xoffset, float yoffset) override
     {

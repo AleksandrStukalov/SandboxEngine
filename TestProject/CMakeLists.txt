@@ -6,6 +6,10 @@ FILE(GLOB SHADERS
     "${CMAKE_SOURCE_DIR}/${EXE_NAME}/src/shaders/**.vert"
     "${CMAKE_SOURCE_DIR}/${EXE_NAME}/src/shaders/**.frag"
 )
+FILE(GLOB TEXTURES
+    "${CMAKE_SOURCE_DIR}/${EXE_NAME}/resources/textures/**.png"
+    "${CMAKE_SOURCE_DIR}/${EXE_NAME}/resources/textures/**.jpg"
+)
 FILE(GLOB SRC 
     "${CMAKE_SOURCE_DIR}/${EXE_NAME}/src/**.h"
     "${CMAKE_SOURCE_DIR}/${EXE_NAME}/src/**.cpp"
@@ -13,10 +17,12 @@ FILE(GLOB SRC
 add_executable(${EXE_NAME}
     ${SRC}
     ${SHADERS}
+    ${TEXTURES}
 )
 
 source_group("src"  FILES  ${SRC})
 source_group("shaders" FILES ${SHADERS})
+source_group("textures" FILES ${TEXTURES})
 
 target_compile_features(${EXE_NAME} PUBLIC cxx_std_17)
 
