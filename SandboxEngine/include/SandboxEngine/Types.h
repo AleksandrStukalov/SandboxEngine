@@ -10,6 +10,8 @@ namespace SE
         DOUBLE,
         INT,
         UNSIGNED_INT,
+        FLOAT_VEC2,
+        FLOAT_VEC3,
     };
 
     unsigned int getPlatformType(SE::Type type);
@@ -18,10 +20,13 @@ namespace SE
     {
         switch (type)
         {
-        case SE::FLOAT:				return sizeof(float);
-        case SE::DOUBLE:			return sizeof(double);
-        case SE::INT:				return sizeof(int);
-        case SE::UNSIGNED_INT:		return sizeof(unsigned int);
+        case SE::FLOAT:             return sizeof(float);
+        case SE::DOUBLE:            return sizeof(double);
+        case SE::INT:               return sizeof(int);
+        case SE::UNSIGNED_INT:      return sizeof(unsigned int);
+        case SE::FLOAT_VEC2:        return sizeof(float) * 2;
+        case SE::FLOAT_VEC3:        return sizeof(float) * 3;
+
         default: SE::Log::error({ "Unsupported type" }); return -1;
         }
     }

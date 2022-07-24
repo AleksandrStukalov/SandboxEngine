@@ -11,9 +11,6 @@
 #include <sstream>
 #include <memory>
 
-float mixValue(0.5f);
-float scaleFactor(0.5f);
-
 struct Vector2f
 {
     union {
@@ -21,7 +18,6 @@ struct Vector2f
         float r;
         float s;
     };
-
     union {
         float y;
         float g;
@@ -30,6 +26,8 @@ struct Vector2f
 
     Vector2f(float x, float y)
         : x{ x }, y{ y } {}
+    Vector2f(float value)
+        : x{value}, y{value} {}
 };
 struct Vector3f
 {
@@ -38,13 +36,11 @@ struct Vector3f
         float r;
         float s;
     };
-
     union {
         float y;
         float g;
         float t;
     };
-
     union {
         float z;
         float b;
@@ -53,7 +49,14 @@ struct Vector3f
 
     Vector3f(float x, float y, float z)
         : x{x}, y{y}, z{z} {}
+    Vector3f(float value)
+        : x{value}, y{value}, z{value} {}
 };
+
+float mixValue(0.5f);
+float scaleFactor(0.5f);
+Vector2f translationFactor(0.0f);
+
 struct Vertex
 {
     Vector3f position;
@@ -63,7 +66,6 @@ struct Vertex
     Vertex(Vector3f position, Vector3f color, Vector2f texPos)
         : position(position), color(color), texPos(texPos) {}
 };
-
 class App : public SE::Application
 {
 public:
@@ -92,7 +94,6 @@ public:
 
         shader->setUniform(SE::INT, "u_texture1", (void*)&texture1->slot);
         shader->setUniform(SE::INT, "u_texture2", (void*)&texture2->slot);
-        shader->setUniform(SE::FLOAT, "mixValue", (void*)&mixValue);
 
         vb.reset(new SE::VertexBuffer(vertices, sizeof(vertices)));
         ib.reset(new SE::IndexBuffer(indices, SE::UNSIGNED_INT, sizeof(indices)));
@@ -132,6 +133,7 @@ public:
     {
         shader->setUniform(SE::FLOAT, "mixValue", (void*)&mixValue);
         shader->setUniform(SE::FLOAT, "u_scaleFactor", (void*)&scaleFactor);
+        shader->setUniform(SE::FLOAT_VEC2, "u_translationFactor", (void*)&translationFactor);
 
         renderer.clear(0.2f, 0.2f, 0.2f);
 
@@ -145,6 +147,7 @@ public:
 
             ImGui::SliderFloat("Mix value", &mixValue, 0, 1);
             ImGui::SliderFloat("Size", &scaleFactor, 0.2, 1.5);
+            ImGui::SliderFloat2("Translation", &translationFactor.x, -1.0f, 1.0f);
 
             ImGui::End();
         }
@@ -163,12 +166,9 @@ public:
     {
         
     }
-
     void processScroll(float offset) override
     {
-        float scalar(0.05f);
-        // Rectangle resizing:
-        scaleFactor += offset * scalar;
+
     }
 
     std::unique_ptr<SE::VertexBuffer> vb;
