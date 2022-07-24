@@ -30,7 +30,6 @@ set_target_properties(${EXE_NAME}
 
 target_include_directories(${EXE_NAME}
     PRIVATE
-        "${CMAKE_SOURCE_DIR}/SandboxEngine/include/"
         "${CMAKE_SOURCE_DIR}/SandboxEngine/dependencies/glfw/include/"
         "${CMAKE_SOURCE_DIR}/SandboxEngine/dependencies/glad/include/"
 )

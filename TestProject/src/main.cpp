@@ -12,6 +12,58 @@
 #include <memory>
 
 float mixValue(0.5f);
+float scaleValue(0.5f);
+
+struct Vector2f
+{
+    union {
+        float x;
+        float r;
+        float s;
+    };
+
+    union {
+        float y;
+        float g;
+        float t;
+    };
+
+    Vector2f(float x, float y)
+        : x{ x }, y{ y } {}
+};
+struct Vector3f
+{
+    union {
+        float x;
+        float r;
+        float s;
+    };
+
+    union {
+        float y;
+        float g;
+        float t;
+    };
+
+    union {
+        float z;
+        float b;
+        float r;
+    };
+
+    Vector3f(float x, float y, float z)
+        : x{x}, y{y}, z{z} {}
+};
+
+struct Vertex
+{
+    Vector3f position;
+    Vector3f color;
+    Vector2f texPos;
+
+    Vertex(Vector3f position, Vector3f color, Vector2f texPos)
+        : position(position), color(color), texPos(texPos) {}
+};
 
 class App : public SE::Application
 {
@@ -20,13 +72,13 @@ public:
     App()
         : Application("App", 800, 600)
     {
-        float vertices[]
+        Vertex vertices[]
         {
-            // Positions         // Colors           // TexPos
-            -0.5f, -0.5f, 0.0f,  0.1f, 0.2f, 0.9f,    0.0f, 0.0f,       // Bottom left
-             -0.5f, 0.5f, 0.0f,  0.5f, 0.65f, 0.1f,   0.0f, 1.0f,       // Top left
-             0.5f, 0.5f, 0.0f,   0.67f, 0.24f, 0.8f,  1.0f, 1.0f,       // Top right
-             0.5f, -0.5f, 0.0f,  0.1f, 0.9f, 0.5f,    1.0f, 0.0f        // Bottom right
+                   // Positions              // Colors              // TexPos
+            Vertex({ -0.5f, -0.5f, -0.5f},  {0.1f, 0.2f, 0.9f},     {0.0f, 0.0f}),        // Bottom left
+            Vertex({-0.5f, 0.5f, 0.0f},     {0.5f, 0.65f, 0.1f},    {0.0f, 1.0f}),        // Top left
+            Vertex({0.5f, 0.5f, 0.0f},      {0.67f, 0.24f, 0.8f},   {1.0f, 1.0f}),        // Top right
+            Vertex({0.5f, -0.5f, 0.0f},     {0.1f, 0.9f, 0.5f},     {1.0f, 0.0f})         // Bottom right
         };
 
         unsigned int indices[]
@@ -79,11 +131,6 @@ public:
 
     void onUpdate() override
     {
-       
-        std::stringstream size;
-        size << "Window size: " << window.width <<  " x "  << window.height;
-        SE::Log::info({ size.str() });
-
         shader->setUniform(SE::FLOAT, "mixValue", (void*)&mixValue);
 
         renderer.clear(0.2f, 0.2f, 0.2f);
