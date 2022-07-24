@@ -29,6 +29,7 @@ void keyCallback(GLFWwindow* handle, int key, int scancode, int action, int mods
         state = !state;
     }
 
+    application.processKeyboard();
 }
 bool SE::Events::isKey(SE::Key key, SE::Action action)
 {

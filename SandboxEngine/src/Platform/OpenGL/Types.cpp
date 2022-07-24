@@ -14,7 +14,7 @@ unsigned int SE::getPlatformType(SE::Type type)
     case SE::FLOAT_VEC2:        return GL_FLOAT_VEC2;
     case SE::FLOAT_VEC3:        return GL_FLOAT_VEC3;
 
-    default: SE::Log::error({ "Unsupported type" }); return -1;
+    default: SE::Log::error({ "Unsupported SE type: ", (const char*)type }); return -1;
     }
 }
 
@@ -28,6 +28,6 @@ SE::Type SE::getSEType(unsigned int type)
     case GL_UNSIGNED_INT:       return SE::UNSIGNED_INT;
     case GL_FLOAT_VEC2:         return SE::FLOAT_VEC2;
     case GL_FLOAT_VEC3:         return SE::FLOAT_VEC3;
-    default: SE::Log::error({ "Unsupported type" }); return SE::Type();
+    default: SE::Log::error({ "Unsupported OpenGL type: ", (const char*)type }); return SE::Type();
     }
 }

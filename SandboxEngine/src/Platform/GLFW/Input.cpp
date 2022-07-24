@@ -73,64 +73,64 @@ unsigned int SE::getPlatformKey(SE::Key key)
     case SE::Key::NUM_LOCK:         return GLFW_KEY_NUM_LOCK;
     case SE::Key::PRINT_SCREEN:     return GLFW_KEY_PRINT_SCREEN;
     case SE::Key::PAUSE:            return GLFW_KEY_PAUSE;
-    case SE::Key::F1:               return  GLFW_KEY_F1;
-    case SE::Key::F2:               return  GLFW_KEY_F2;
-    case SE::Key::F3:               return  GLFW_KEY_F3;
-    case SE::Key::F4:               return  GLFW_KEY_F4;
-    case SE::Key::F5:               return  GLFW_KEY_F5;
-    case SE::Key::F6:               return  GLFW_KEY_F6;
-    case SE::Key::F7:               return  GLFW_KEY_F7;
-    case SE::Key::F8:               return  GLFW_KEY_F8;
-    case SE::Key::F9:               return  GLFW_KEY_F9;
-    case SE::Key::F10:              return  GLFW_KEY_F10;
-    case SE::Key::F11:              return  GLFW_KEY_F11;
-    case SE::Key::F12:              return  GLFW_KEY_F12;
-    case SE::Key::F13:              return  GLFW_KEY_F13;
-    case SE::Key::F14:              return  GLFW_KEY_F14;
-    case SE::Key::F15:              return  GLFW_KEY_F15;
-    case SE::Key::F16:              return  GLFW_KEY_F16;
-    case SE::Key::F17:              return  GLFW_KEY_F17;
-    case SE::Key::F18:              return  GLFW_KEY_F18;
-    case SE::Key::F19:              return  GLFW_KEY_F19;
-    case SE::Key::F20:              return	GLFW_KEY_F20;
-    case SE::Key::F21:              return	GLFW_KEY_F21;
-    case SE::Key::F22:              return	GLFW_KEY_F22;
-    case SE::Key::F23:              return	GLFW_KEY_F23;
-    case SE::Key::F24:              return	GLFW_KEY_F24;
-    case SE::Key::F25:              return	GLFW_KEY_F25;
-    case SE::Key::KP_0:             return	GLFW_KEY_KP_0;
-    case SE::Key::KP_1:             return	GLFW_KEY_KP_1;
-    case SE::Key::KP_2:             return	GLFW_KEY_KP_2;
-    case SE::Key::KP_3:             return	GLFW_KEY_KP_3;
-    case SE::Key::KP_4:             return	GLFW_KEY_KP_4;
-    case SE::Key::KP_5:             return	GLFW_KEY_KP_5;
-    case SE::Key::KP_6:             return	GLFW_KEY_KP_6;
-    case SE::Key::KP_7:             return	GLFW_KEY_KP_7;
-    case SE::Key::KP_8:             return	GLFW_KEY_KP_8;
-    case SE::Key::KP_9:             return	GLFW_KEY_KP_9;
-    case SE::Key::KP_DECIMAL:       return	GLFW_KEY_KP_DECIMAL;
-    case SE::Key::KP_DIVIDE:        return	GLFW_KEY_KP_DIVIDE;
-    case SE::Key::KP_MULTIPLY:      return	GLFW_KEY_KP_MULTIPLY;
-    case SE::Key::KP_SUBTRACT:      return	GLFW_KEY_KP_SUBTRACT;
-    case SE::Key::KP_ADD:           return	GLFW_KEY_KP_ADD;
-    case SE::Key::KP_ENTER:         return	GLFW_KEY_KP_ENTER;
-    case SE::Key::KP_EQUAL:         return	GLFW_KEY_KP_EQUAL;
-    case SE::Key::LEFT_SHIFT:       return	GLFW_KEY_LEFT_SHIFT;
-    case SE::Key::LEFT_CONTROL:     return	GLFW_KEY_LEFT_CONTROL;
-    case SE::Key::LEFT_ALT:         return	GLFW_KEY_LEFT_ALT;
-    case SE::Key::LEFT_SUPER:       return	GLFW_KEY_LEFT_SUPER;
-    case SE::Key::RIGHT_SHIFT:      return	GLFW_KEY_RIGHT_SHIFT;
-    case SE::Key::RIGHT_CONTROL:    return	GLFW_KEY_RIGHT_CONTROL;
-    case SE::Key::RIGHT_ALT:        return	GLFW_KEY_RIGHT_ALT;
-    case SE::Key::RIGHT_SUPER:      return	GLFW_KEY_RIGHT_SUPER;
-    case SE::Key::MENU:             return	GLFW_KEY_MENU;
+    case SE::Key::F1:               return GLFW_KEY_F1;
+    case SE::Key::F2:               return GLFW_KEY_F2;
+    case SE::Key::F3:               return GLFW_KEY_F3;
+    case SE::Key::F4:               return GLFW_KEY_F4;
+    case SE::Key::F5:               return GLFW_KEY_F5;
+    case SE::Key::F6:               return GLFW_KEY_F6;
+    case SE::Key::F7:               return GLFW_KEY_F7;
+    case SE::Key::F8:               return GLFW_KEY_F8;
+    case SE::Key::F9:               return GLFW_KEY_F9;
+    case SE::Key::F10:              return GLFW_KEY_F10;
+    case SE::Key::F11:              return GLFW_KEY_F11;
+    case SE::Key::F12:              return GLFW_KEY_F12;
+    case SE::Key::F13:              return GLFW_KEY_F13;
+    case SE::Key::F14:              return GLFW_KEY_F14;
+    case SE::Key::F15:              return GLFW_KEY_F15;
+    case SE::Key::F16:              return GLFW_KEY_F16;
+    case SE::Key::F17:              return GLFW_KEY_F17;
+    case SE::Key::F18:              return GLFW_KEY_F18;
+    case SE::Key::F19:              return GLFW_KEY_F19;
+    case SE::Key::F20:              return GLFW_KEY_F20;
+    case SE::Key::F21:              return GLFW_KEY_F21;
+    case SE::Key::F22:              return GLFW_KEY_F22;
+    case SE::Key::F23:              return GLFW_KEY_F23;
+    case SE::Key::F24:              return GLFW_KEY_F24;
+    case SE::Key::F25:              return GLFW_KEY_F25;
+    case SE::Key::KP_0:             return GLFW_KEY_KP_0;
+    case SE::Key::KP_1:             return GLFW_KEY_KP_1;
+    case SE::Key::KP_2:             return GLFW_KEY_KP_2;
+    case SE::Key::KP_3:             return GLFW_KEY_KP_3;
+    case SE::Key::KP_4:             return GLFW_KEY_KP_4;
+    case SE::Key::KP_5:             return GLFW_KEY_KP_5;
+    case SE::Key::KP_6:             return GLFW_KEY_KP_6;
+    case SE::Key::KP_7:             return GLFW_KEY_KP_7;
+    case SE::Key::KP_8:             return GLFW_KEY_KP_8;
+    case SE::Key::KP_9:             return GLFW_KEY_KP_9;
+    case SE::Key::KP_DECIMAL:       return GLFW_KEY_KP_DECIMAL;
+    case SE::Key::KP_DIVIDE:        return GLFW_KEY_KP_DIVIDE;
+    case SE::Key::KP_MULTIPLY:      return GLFW_KEY_KP_MULTIPLY;
+    case SE::Key::KP_SUBTRACT:      return GLFW_KEY_KP_SUBTRACT;
+    case SE::Key::KP_ADD:           return GLFW_KEY_KP_ADD;
+    case SE::Key::KP_ENTER:         return GLFW_KEY_KP_ENTER;
+    case SE::Key::KP_EQUAL:         return GLFW_KEY_KP_EQUAL;
+    case SE::Key::LEFT_SHIFT:       return GLFW_KEY_LEFT_SHIFT;
+    case SE::Key::LEFT_CONTROL:     return GLFW_KEY_LEFT_CONTROL;
+    case SE::Key::LEFT_ALT:         return GLFW_KEY_LEFT_ALT;
+    case SE::Key::LEFT_SUPER:       return GLFW_KEY_LEFT_SUPER;
+    case SE::Key::RIGHT_SHIFT:      return GLFW_KEY_RIGHT_SHIFT;
+    case SE::Key::RIGHT_CONTROL:    return GLFW_KEY_RIGHT_CONTROL;
+    case SE::Key::RIGHT_ALT:        return GLFW_KEY_RIGHT_ALT;
+    case SE::Key::RIGHT_SUPER:      return GLFW_KEY_RIGHT_SUPER;
+    case SE::Key::MENU:             return GLFW_KEY_MENU;
 
-    default:                        SE::Log::warning({ "Unsupported key" }); return -1;
+    default:                        SE::Log::warning({ "Unsupported SE key: ", (const char*)key}); return -1;
     }
 }
-unsigned int SE::getPlatformKeyMode(SE::KeyMode keyMode)
+unsigned int SE::getPlatformKeyMode(SE::KeyMode mode)
 {
-    switch (keyMode)
+    switch (mode)
     {
     case SE::KeyMode::SHIFT:        return GLFW_MOD_SHIFT;
     case SE::KeyMode::CONTROL:      return GLFW_MOD_CONTROL;
@@ -138,21 +138,21 @@ unsigned int SE::getPlatformKeyMode(SE::KeyMode keyMode)
     case SE::KeyMode::SUPER:        return GLFW_MOD_SUPER;
     case SE::KeyMode::CAPS_LOCK:    return GLFW_MOD_CAPS_LOCK;
     case SE::KeyMode::NUM_LOCK:     return GLFW_MOD_NUM_LOCK;
-    default:                        SE::Log::warning({ "Unsupported key mode" }); return -1;
+    default:                        SE::Log::warning({ "Unsupported SE key mode: ", (const char*)mode}); return -1;
     }
 }
 unsigned int SE::getPlatformMouseButton(SE::MouseButton mouseButton)
 {
     switch (mouseButton)
     {
-    case SE::MouseButton::LEFT:             return GLFW_MOUSE_BUTTON_LEFT;
-    case SE::MouseButton::RIGHT:            return GLFW_MOUSE_BUTTON_RIGHT;
-    case SE::MouseButton::MIDDLE:           return GLFW_MOUSE_BUTTON_MIDDLE;
-    case SE::MouseButton::BUTTON_4:         return GLFW_MOUSE_BUTTON_4;
-    case SE::MouseButton::BUTTON_5:         return GLFW_MOUSE_BUTTON_5;
-    case SE::MouseButton::BUTTON_6:         return GLFW_MOUSE_BUTTON_6;
-    case SE::MouseButton::BUTTON_7:         return GLFW_MOUSE_BUTTON_7;
-    default:                                SE::Log::warning({ "Unsupported mouse button" }); return -1;
+    case SE::MouseButton::LEFT:         return GLFW_MOUSE_BUTTON_LEFT;
+    case SE::MouseButton::RIGHT:        return GLFW_MOUSE_BUTTON_RIGHT;
+    case SE::MouseButton::MIDDLE:       return GLFW_MOUSE_BUTTON_MIDDLE;
+    case SE::MouseButton::BUTTON_4:     return GLFW_MOUSE_BUTTON_4;
+    case SE::MouseButton::BUTTON_5:     return GLFW_MOUSE_BUTTON_5;
+    case SE::MouseButton::BUTTON_6:     return GLFW_MOUSE_BUTTON_6;
+    case SE::MouseButton::BUTTON_7:     return GLFW_MOUSE_BUTTON_7;
+    default:                            SE::Log::warning({ "Unsupported SE mouse button: ", (const char*)mouseButton}); return -1;
     }
 }
 SE::Key SE::getSEKey(unsigned int key)
@@ -278,33 +278,33 @@ SE::Key SE::getSEKey(unsigned int key)
     case GLFW_KEY_RIGHT_SUPER:      return SE::Key::RIGHT_SUPER;
     case GLFW_KEY_MENU:             return SE::Key::MENU;
 
-    default:                        SE::Log::warning({ "Unsupported key" }); return SE::Key();
+    default:                        SE::Log::warning({ "Unsupported OpenGL key: ", (const char*)key}); return SE::Key();
     }
 }
 SE::KeyMode SE::getSEkeyMode(unsigned int mode)
 {
     switch (mode)
     {
-    case GLFW_MOD_SHIFT:        return SE::KeyMode::SHIFT;
-    case GLFW_MOD_CONTROL:      return SE::KeyMode::CONTROL;
-    case GLFW_MOD_ALT:          return SE::KeyMode::ALT;
-    case GLFW_MOD_SUPER:        return SE::KeyMode::SUPER;
-    case GLFW_MOD_CAPS_LOCK:    return SE::KeyMode::CAPS_LOCK;
-    case GLFW_MOD_NUM_LOCK:     return SE::KeyMode::NUM_LOCK;
-    default:                    SE::Log::warning({ "Unsupported key mode" }); return SE::KeyMode();
+    case GLFW_MOD_SHIFT:            return SE::KeyMode::SHIFT;
+    case GLFW_MOD_CONTROL:          return SE::KeyMode::CONTROL;
+    case GLFW_MOD_ALT:              return SE::KeyMode::ALT;
+    case GLFW_MOD_SUPER:            return SE::KeyMode::SUPER;
+    case GLFW_MOD_CAPS_LOCK:        return SE::KeyMode::CAPS_LOCK;
+    case GLFW_MOD_NUM_LOCK:         return SE::KeyMode::NUM_LOCK;
+    default:                        SE::Log::warning({ "Unsupported OpenGL key mode: ", (const char*)mode }); return SE::KeyMode();
     }
 }
 SE::MouseButton SE::getSEMouseButton(unsigned int mouseButton)
 {
     switch (mouseButton)
     {
-    case GLFW_MOUSE_BUTTON_LEFT:        return SE::MouseButton::LEFT;
-    case GLFW_MOUSE_BUTTON_RIGHT:       return SE::MouseButton::RIGHT;
-    case GLFW_MOUSE_BUTTON_MIDDLE:      return SE::MouseButton::MIDDLE;
-    case GLFW_MOUSE_BUTTON_4:           return SE::MouseButton::BUTTON_4;
-    case GLFW_MOUSE_BUTTON_5:           return SE::MouseButton::BUTTON_5;
-    case GLFW_MOUSE_BUTTON_6:           return SE::MouseButton::BUTTON_6;
-    case GLFW_MOUSE_BUTTON_7:           return SE::MouseButton::BUTTON_7;
-    default:                            SE::Log::warning({ "Unsupported mouse button" }); return SE::MouseButton();
+    case GLFW_MOUSE_BUTTON_LEFT:    return SE::MouseButton::LEFT;
+    case GLFW_MOUSE_BUTTON_RIGHT:   return SE::MouseButton::RIGHT;
+    case GLFW_MOUSE_BUTTON_MIDDLE:  return SE::MouseButton::MIDDLE;
+    case GLFW_MOUSE_BUTTON_4:       return SE::MouseButton::BUTTON_4;
+    case GLFW_MOUSE_BUTTON_5:       return SE::MouseButton::BUTTON_5;
+    case GLFW_MOUSE_BUTTON_6:       return SE::MouseButton::BUTTON_6;
+    case GLFW_MOUSE_BUTTON_7:       return SE::MouseButton::BUTTON_7;
+    default:                        SE::Log::warning({ "Unsupported OpenGL mouse button: ", (const char*)mouseButton }); return SE::MouseButton();
     }
 }

@@ -1,7 +1,6 @@
 #include "SandboxEngine.h"
 
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -11,59 +10,19 @@
 #include <sstream>
 #include <memory>
 
-struct Vector2f
-{
-    union {
-        float x;
-        float r;
-        float s;
-    };
-    union {
-        float y;
-        float g;
-        float t;
-    };
 
-    Vector2f(float x, float y)
-        : x{ x }, y{ y } {}
-    Vector2f(float value)
-        : x{value}, y{value} {}
-};
-struct Vector3f
-{
-    union {
-        float x;
-        float r;
-        float s;
-    };
-    union {
-        float y;
-        float g;
-        float t;
-    };
-    union {
-        float z;
-        float b;
-        float r;
-    };
-
-    Vector3f(float x, float y, float z)
-        : x{x}, y{y}, z{z} {}
-    Vector3f(float value)
-        : x{value}, y{value}, z{value} {}
-};
 
 float mixValue(0.5f);
-float scaleFactor(0.5f);
-Vector2f translationFactor(0.0f);
+SE::Vec2f position(0.0f);
+float size(0.5f);
 
 struct Vertex
 {
-    Vector3f position;
-    Vector3f color;
-    Vector2f texPos;
+    SE::Vec3f position;
+    SE::Vec3f color;
+    SE::Vec2f texPos;
 
-    Vertex(Vector3f position, Vector3f color, Vector2f texPos)
+    Vertex(SE::Vec3f position, SE::Vec3f color, SE::Vec2f texPos)
         : position(position), color(color), texPos(texPos) {}
 };
 class App : public SE::Application
@@ -71,7 +30,7 @@ class App : public SE::Application
 public:
 
     App()
-        : Application("App", 800, 600)
+        : Application("App", 1920, 1080)
     {
         Vertex vertices[]
         {
@@ -132,11 +91,22 @@ public:
     void onUpdate() override
     {
         shader->setUniform(SE::FLOAT, "mixValue", (void*)&mixValue);
-        shader->setUniform(SE::FLOAT, "u_scaleFactor", (void*)&scaleFactor);
-        shader->setUniform(SE::FLOAT_VEC2, "u_translationFactor", (void*)&translationFactor);
+        
+        SE::Mat4f scale(size, 0.0f, 0.0f, 0.0f,
+                        0.0f, size, 0.0f, 0.0f,
+                        0.0f, 0.0f, 1.0f, 0.0f,
+                        0.0f, 0.0f, 0.0f, 1.0f);
+        shader->setUniform(SE::MAT4, "u_scale", (void*)&scale);
+
+        SE::Mat4f translation(1.0f, 0.0f, 0.0f, position.x,
+                              0.0f, 1.0f, 0.0f, position.y,
+                              0.0f, 0.0f, 1.0f, 0.0f,
+                              0.0f, 0.0f, 0.0f, 1.0f);
+        translation.transpose();
+        shader->setUniform(SE::MAT4, "u_translation", (void*)&translation);
+
 
         renderer.clear(0.2f, 0.2f, 0.2f);
-
 
         // Starting imgui frame:
         ImGui_ImplOpenGL3_NewFrame();
@@ -146,22 +116,29 @@ public:
             ImGui::Begin("##");
 
             ImGui::SliderFloat("Mix value", &mixValue, 0, 1);
-            ImGui::SliderFloat("Size", &scaleFactor, 0.2, 1.5);
-            ImGui::SliderFloat2("Translation", &translationFactor.x, -1.0f, 1.0f);
+            ImGui::SliderFloat2("Position", &position.x, -1, 1);
+            ImGui::SliderFloat("Size", &size, 0, 1);
 
             ImGui::End();
         }
         ImGui::Render();
 
-
+        // Rendering out data:
         std::vector<SE::Texture*> textures{ texture1.get(), texture2.get() };
         renderer.draw(*va.get(), *ib.get(), *shader.get(), textures);
 
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
     }
 
+    void processKeyboard() override
+    {
+        float scalar(0.05);
+        if (events.isKey(SE::Key::W, SE::Action::PRESSED)) position.y += scalar;
+        if (events.isKey(SE::Key::A, SE::Action::PRESSED)) position.x -= scalar;
+        if (events.isKey(SE::Key::S, SE::Action::PRESSED)) position.y -= scalar;
+        if (events.isKey(SE::Key::D, SE::Action::PRESSED)) position.x += scalar;
+    }
     void processMouseMovement(float xoffset, float yoffset) override
     {
         

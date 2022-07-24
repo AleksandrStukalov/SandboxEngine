@@ -7,15 +7,12 @@ layout (location = 2) in vec2 aTexPos;
 out vec3 color;
 out vec2 texPos;
 
-uniform float u_scaleFactor;
-uniform vec2 u_translationFactor;
+uniform mat4 u_translation;
+uniform mat4 u_scale;
 
 void main()
 {
     color = aColor;
     texPos = aTexPos;
-
-    vec3 pos = aPos * u_scaleFactor;
-    pos = pos + vec3(u_translationFactor, 0.0f);
-    gl_Position = vec4(pos, 1.0f);
+    gl_Position = u_translation * u_scale * vec4(aPos, 1.0f);
 }

@@ -12,6 +12,7 @@ namespace SE
         UNSIGNED_INT,
         FLOAT_VEC2,
         FLOAT_VEC3,
+        MAT4,
     };
 
     unsigned int getPlatformType(SE::Type type);
@@ -26,8 +27,9 @@ namespace SE
         case SE::UNSIGNED_INT:      return sizeof(unsigned int);
         case SE::FLOAT_VEC2:        return sizeof(float) * 2;
         case SE::FLOAT_VEC3:        return sizeof(float) * 3;
+        case SE::MAT4:              return sizeof(float) * 4;
 
-        default: SE::Log::error({ "Unsupported type" }); return -1;
+        default: SE::Log::error({ "No size definition for type: ", (const char*)type }); return -1;
         }
     }
 

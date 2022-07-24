@@ -7,7 +7,7 @@ namespace SE
     enum class MouseButton;
 
     unsigned int getPlatformKey(SE::Key key);
-    unsigned int getPlatformKeyMode(SE::KeyMode keyMode);
+    unsigned int getPlatformKeyMode(SE::KeyMode mode);
     unsigned int getPlatformMouseButton(SE::MouseButton mouseButton);
     SE::Key getSEKey(unsigned int key);
     SE::KeyMode getSEkeyMode(unsigned int mode);
