@@ -12,7 +12,7 @@
 #include <memory>
 
 float mixValue(0.5f);
-float scaleValue(0.5f);
+float scaleFactor(0.5f);
 
 struct Vector2f
 {
@@ -54,7 +54,6 @@ struct Vector3f
     Vector3f(float x, float y, float z)
         : x{x}, y{y}, z{z} {}
 };
-
 struct Vertex
 {
     Vector3f position;
@@ -132,6 +131,7 @@ public:
     void onUpdate() override
     {
         shader->setUniform(SE::FLOAT, "mixValue", (void*)&mixValue);
+        shader->setUniform(SE::FLOAT, "u_scaleFactor", (void*)&scaleFactor);
 
         renderer.clear(0.2f, 0.2f, 0.2f);
 
@@ -144,6 +144,7 @@ public:
             ImGui::Begin("##");
 
             ImGui::SliderFloat("Mix value", &mixValue, 0, 1);
+            ImGui::SliderFloat("Size", &scaleFactor, 0.2, 1.5);
 
             ImGui::End();
         }
@@ -166,7 +167,8 @@ public:
     void processScroll(float offset) override
     {
         float scalar(0.05f);
-        mixValue += offset * scalar;
+        // Rectangle resizing:
+        scaleFactor += offset * scalar;
     }
 
     std::unique_ptr<SE::VertexBuffer> vb;
