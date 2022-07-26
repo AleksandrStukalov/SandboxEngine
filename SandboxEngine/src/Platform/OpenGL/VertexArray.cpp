@@ -19,8 +19,6 @@ void SE::VertexArray::bind()
 
 void SE::VertexArray::add(VertexBuffer& vb, VertexBufferLayout& layout)
 {
-    vertexCount = layout.vertexCount;
-
     this->bind();
     vb.bind();
 

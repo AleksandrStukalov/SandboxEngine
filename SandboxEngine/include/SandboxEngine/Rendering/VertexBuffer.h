@@ -38,11 +38,9 @@ namespace SE
             attributes.push_back(&attribute);
             attribute.offset = this->stride;
             this->stride += SE::getSizeOfType(attribute.type) * attribute.count;
-            vertexCount += attribute.count;
         }
 
         unsigned int stride{ 0 };// NOTE: Must be initialized!
-        unsigned int vertexCount{ 0 };
 
         std::vector<VertexAttribute*> attributes;
     };

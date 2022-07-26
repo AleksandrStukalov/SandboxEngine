@@ -42,12 +42,12 @@ void SE::Renderer::setPolygonMode(PolygonMode mode) const
     }
 }
 
-void SE::Renderer::draw(VertexArray& va, Shader& shader, std::vector<Texture*> textures, DrawMode mode)
+void SE::Renderer::draw(VertexArray& va, Shader& shader, std::vector<Texture*> textures, const unsigned int vertexCount, DrawMode mode)
 {
     shader.bind();
     for (auto texture : textures) texture->bind();
     va.bind();
-    glDrawArrays(getOpenGLMode(mode), 0, va.vertexCount);
+    glDrawArrays(getOpenGLMode(mode), 0, vertexCount);
 }
 
 void SE::Renderer::draw(VertexArray& va, IndexBuffer& ib, Shader& shader, std::vector<Texture*> textures, DrawMode mode)
