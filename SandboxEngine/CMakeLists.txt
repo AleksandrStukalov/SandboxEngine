@@ -50,6 +50,7 @@ target_include_directories(${ENGINE_NAME}
     PUBLIC
         "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/"
         "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/imgui/"
+        "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/glm/"
     PRIVATE
         "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/"
         "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/glfw/include/"
@@ -61,9 +62,10 @@ target_link_directories(${ENGINE_NAME}
     PRIVATE 
         "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/glfw/src/"
         "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/glad/"
+        "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/glm/"
 )
 
-target_link_libraries(${ENGINE_NAME} "glfw" "glad")
+target_link_libraries(${ENGINE_NAME} "glfw" "glad" "glm")
 
 target_precompile_headers(${ENGINE_NAME}
     PRIVATE

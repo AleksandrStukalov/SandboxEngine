@@ -35,3 +35,4 @@ endif()
 
 add_subdirectory("SandboxEngine/dependencies/glfw")
 add_subdirectory("SandboxEngine/dependencies/glad")
+add_subdirectory("SandboxEngine/dependencies/glm")
