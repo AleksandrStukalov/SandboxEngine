@@ -20,6 +20,7 @@ namespace SE
     class IndexBuffer;
     class Shader;
     class Texture;
+    class Object;
 
     class Renderer
     {
@@ -31,5 +32,6 @@ namespace SE
 
         void draw(VertexArray& va, Shader& shader, std::vector<Texture*> textures, const unsigned int vertexCount, DrawMode mode = DrawMode::TRIANGLES);
         void draw(VertexArray& va, IndexBuffer& ib, Shader& shader, std::vector<Texture*> textures, DrawMode mode = DrawMode::TRIANGLES);
+        void draw(Object& object, DrawMode mode = DrawMode::TRIANGLES);
     };
 }

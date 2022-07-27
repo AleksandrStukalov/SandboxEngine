@@ -59,3 +59,8 @@ void SE::Renderer::draw(VertexArray& va, IndexBuffer& ib, Shader& shader, std::v
     glDrawElements(getOpenGLMode(mode), ib.vertexCount, SE::getPlatformType(ib.type), 0);
 }
 
+void SE::Renderer::draw(Object& object, DrawMode mode)
+{
+    object.bind();
+    glDrawArrays(getOpenGLMode(mode), 0, object.vertexCount);
+}
