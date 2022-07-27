@@ -6,6 +6,7 @@
 
 namespace SE
 {
+    float getTime();
     class Application
     {
     public:
@@ -15,8 +16,16 @@ namespace SE
         {
             while (!window.shouldClose())
             {
-                if (events.isKey(SE::Key::ONE, SE::Action::PRESSED)) renderer.setPolygonMode(SE::PolygonMode::STANDARD);
-                if (events.isKey(SE::Key::TWO, SE::Action::PRESSED)) renderer.setPolygonMode(SE::PolygonMode::WIREFRAME);
+                // Processing input:
+                if (events.isKey(SE::Key::ESCAPE, SE::Action::PRESSED)) window.setShouldClose();
+                if (events.isKey(SE::Key::ONE, SE::Action::PRESSED))    renderer.setPolygonMode(SE::PolygonMode::STANDARD);
+                if (events.isKey(SE::Key::TWO, SE::Action::PRESSED))    renderer.setPolygonMode(SE::PolygonMode::WIREFRAME);
+                processKeyboard();
+
+                // Calculating delta time:
+                float currentFrameTime = getTime();
+                deltaTime = currentFrameTime - lastFrameTime;
+                lastFrameTime = currentFrameTime;
 
                 onUpdate();
 
@@ -32,9 +41,13 @@ namespace SE
         Window window;
         Events events;
         Renderer renderer;
+        float deltaTime{0.0f};
 
     protected:
         virtual void onUpdate() = 0;
+
+    private:
+        float lastFrameTime{0.0f};
     };
 }
 

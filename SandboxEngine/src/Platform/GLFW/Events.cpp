@@ -3,6 +3,8 @@
 
 #include <GLFW/glfw3.h>
 
+float SE::getTime() { return (float)glfwGetTime(); }
+
 void SE::Events::poll() { glfwPollEvents(); }
 
 // Callbacks:
@@ -29,7 +31,7 @@ void keyCallback(GLFWwindow* handle, int key, int scancode, int action, int mods
         state = !state;
     }
 
-    application.processKeyboard();
+   // application.processKeyboard(); // NEVER!!!
 }
 bool SE::Events::isKey(SE::Key key, SE::Action action)
 {

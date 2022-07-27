@@ -1,6 +1,7 @@
 #include "SandboxEngine.h"
 
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -19,14 +20,15 @@
 #include <process.h>
 #define RAND rand() / (float)RAND_MAX
 
-
-float mixValue(0.5f);
-glm::vec2 position(0.0f);
+// Object:
+float mixValue(0.0f);
+glm::vec3 position(0.0f);
 float size(0.5f);
-
-glm::mat4 rotation(1.0f);
+glm::vec3 objPos(0.0f, 0.0f, -3.0f);
 glm::vec3 angle(0.0f);
-glm::vec3 prevAngle(0.0f);
+
+// Camera:
+bool cameraMode(false);
 
 struct Vertex
 {
@@ -45,7 +47,7 @@ class App : public SE::Application
 public:
 
     App()
-        : Application("App", 1080, 1080)
+        : Application("App", 1920, 1080)
     {
         Vertex vertices[36];
         {
@@ -105,6 +107,7 @@ public:
 
         }
 
+        camera.reset(new SE::Camera());
 
         shader.reset(new SE::Shader("src/shaders/basic.vert", "src/shaders/basic.frag"));
         texture1.reset(new SE::Texture("resources/textures/sand.png"));
@@ -148,39 +151,37 @@ public:
 
     void onUpdate() override
     {
+        // Toggling camera mode:
+        if (cameraMode)  window.setCursorMode(SE::CursorMode::CAPTURE);
+        else             window.setCursorMode(SE::CursorMode::STANDARD);
+
+
         shader->setUniform(SE::FLOAT, "mixValue", (void*)&mixValue);
         
+        // ** Transformations:
+        // * Model:
         // Scaling:
         glm::mat4 scale = glm::scale(glm::mat4(1), glm::vec3(size, size, size));
-        shader->setUniform(SE::MAT4F, "u_scale", (void*)&scale);
 
         // Rotation:
-
-        if (prevAngle.x != angle.x)
-        {
-            float deltaAngle = angle.x - prevAngle.x;
-            rotation = glm::rotate(rotation, glm::radians(deltaAngle), glm::vec3(1, 0, 0));
-            prevAngle = angle;
-        }
-        if (prevAngle.y != angle.y)
-        {
-            float deltaAngle = angle.y - prevAngle.y;
-            rotation = glm::rotate(rotation, glm::radians(deltaAngle), glm::vec3(0, 1, 0));
-            prevAngle = angle;
-        }
-        if (prevAngle.z != angle.z)
-        {
-            float deltaAngle = angle.z - prevAngle.z;
-            rotation = glm::rotate(rotation, glm::radians(deltaAngle), glm::vec3(0, 0, 1));
-            prevAngle = angle;
-        }
-
-        shader->setUniform(SE::MAT4F, "u_rotation", (void*)&rotation);
+        glm::mat4 rotation(1.0f);
+        rotation = glm::rotate(rotation, glm::radians(angle.x), glm::vec3(1.0f, 0.0f, 0.0f));
+        rotation = glm::rotate(rotation, glm::radians(angle.y), glm::vec3(0.0f, 1.0f, 0.0f));
+        rotation = glm::rotate(rotation, glm::radians(angle.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
         // Translation:
-        glm::mat4 translation = glm::translate(glm::mat4(1), glm::vec3(position, 0.0f));
+        glm::mat4 translation = glm::translate(glm::mat4(1), position);
 
-        shader->setUniform(SE::MAT4F, "u_translation", (void*)&translation);
+        glm::mat4 model = translation * rotation * scale;
+
+        // * View
+        glm::mat4 view = camera->getViewMatrix();
+
+        // * Projection:
+        glm::mat4 projection = glm::perspective(glm::radians(camera->FOV), (float)window.width / (float)window.height, 0.1f, 100.0f);
+
+        glm::mat4 mvp = projection * view * model;
+        shader->setUniform(SE::MAT4F, "u_transformation", (void*)&mvp);
 
         renderer.clear(0.2f, 0.2f, 0.2f);
 
@@ -191,10 +192,15 @@ public:
         {
             ImGui::Begin("##");
 
+            ImGui::Text("Object:");
             ImGui::SliderFloat("Mix value", &mixValue, 0, 1);
-            ImGui::SliderFloat2("Position", &position.x, -5, 5);
+            ImGui::SliderFloat3("Position", &position.x, -5, 5);
             ImGui::SliderFloat("Size", &size, 0, 1);
-            ImGui::SliderFloat3("Rotation", &angle.x, -360, 360);
+            ImGui::SliderFloat3("Rotation", &angle.x, 360, -360);
+            ImGui::Text("Camera:");
+            ImGui::Text("Press 'C' to enable camera mode");
+            ImGui::SliderFloat("Speed", &camera->speed, 0, 5);
+            ImGui::SliderFloat("Zoom", &camera->FOV, 10.0f, 90.0f);
 
             ImGui::End();
         }
@@ -210,15 +216,19 @@ public:
 
     void processKeyboard() override
     {
-        
+        cameraMode = events.isKey(SE::Key::C, SE::Action::TOGGLE);
+
+        if (cameraMode) camera->processKeyboard(events, deltaTime);
+
+
     }
     void processMouseMovement(float xoffset, float yoffset) override
     {
-        
+        if (cameraMode) camera->processMouseMovement(xoffset, yoffset);
     }
     void processScroll(float offset) override
     {
-
+        if (cameraMode) camera->processScroll(offset);
     }
 
     std::unique_ptr<SE::VertexBuffer> vb;
@@ -226,6 +236,7 @@ public:
     std::unique_ptr<SE::Shader> shader;
     std::unique_ptr<SE::Texture> texture1;
     std::unique_ptr<SE::Texture> texture2;
+    std::unique_ptr<SE::Camera> camera;
 };
 
 int main()
