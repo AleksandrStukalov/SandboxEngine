@@ -23,10 +23,13 @@ namespace SE
     class Object
     {
     public:
-        Object(Vertex* vertices, const unsigned int vertexCount)
-            : vertexCount(vertexCount),
-            vertices(vertices),
-            vb(vertices, sizeof(Vertex)* vertexCount)// NOTE: Do not shove sizeof(vertices) there! You'll get size of poiter!
+        Object(Vertex* vertices, const unsigned int vertexCount, glm::vec3 position = glm::vec3(0.0f), glm::vec3 angle = glm::vec3(0.0f), float size = 1.0f)
+            : vertexCount(vertexCount)
+            , vertices(vertices)
+            , position(position)
+            , angle(angle)
+            , size(size)
+            , vb(vertices, sizeof(Vertex)* vertexCount)// NOTE: Do not shove sizeof(vertices) there! You'll get size of poiter!
         {
             SE::VertexAttribute positions(3, SE::FLOAT);
             SE::VertexAttribute colors(3, SE::FLOAT);
@@ -72,8 +75,8 @@ namespace SE
         SE::VertexArray va;
 
 
-        float size{ 1.0f };
-        glm::vec3 angle{ 0.0f };
-        glm::vec3 position{ 0.0f };
+        float size;
+        glm::vec3 angle;
+        glm::vec3 position;
     };
 }

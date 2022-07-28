@@ -9,7 +9,7 @@ namespace SE
     class Camera
     {
     public:
-        inline Camera(const glm::vec3 position = glm::vec3(0.0f, 0.0f, 3.0f), const float speed = 1.0f)
+        inline Camera(const glm::vec3 position = glm::vec3(0.0f, 0.0f, 3.0f), const float speed = 5.0f)
             : position(position), front(0.0f, 0.0f, -1.0f), up(0.0f, 1.0f, 0.0f),
             pitch(0.0f), yaw(-90.0f),
             FOV(45.0f),
@@ -53,7 +53,7 @@ namespace SE
 
         inline void processScroll(float offset)
         {
-            FOV -= offset;
+            speed += offset;
         }
 
         glm::vec3 position, front, up;

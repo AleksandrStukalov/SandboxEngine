@@ -24,8 +24,8 @@ bool cameraMode(false);
 class Cube : public SE::Object
 {
 public:
-    Cube(SE::Texture* texture1, SE::Texture* texture2, SE::Shader* shader)
-        : Object(vertexInit(), 36),
+    Cube(SE::Texture* texture1, SE::Texture* texture2, SE::Shader* shader, glm::vec3 position = glm::vec3(0.0f), glm::vec3 angle = glm::vec3(0.0f), float size = 1.0f)
+        : Object(vertexInit(), 36, position, angle, size),
         texture1(*texture1),
         texture2(*texture2),
         shader(*shader)
@@ -111,9 +111,11 @@ public:
     SE::Texture& texture1;
     SE::Texture& texture2;
     SE::Shader&  shader;
-    float mixValue{ 0.0f };
+    float mixValue{ 0.5f };
 };
 
+const unsigned int cubeCount{ 10 };
+float mixValue{ 0.5f };
 
 class App : public SE::Application
 {
@@ -123,8 +125,16 @@ public:
         : Application("App", 1920, 1080)
     {
         camera.reset(new SE::Camera());
+        SE::Texture* texture1 = new SE::Texture("resources/textures/sand.png", false);
+        SE::Texture* texture2 = new SE::Texture("resources/textures/sod.jpg", true);
+        SE::Shader* shader = new SE::Shader("src/shaders/basic.vert", "src/shaders/basic.frag");
 
-        cube.reset(new Cube((new SE::Texture("resources/textures/sand.png")), (new SE::Texture("resources/textures/sod.jpg", true)),(new SE::Shader("src/shaders/basic.vert", "src/shaders/basic.frag"))));
+        // Filling cube array:
+        for (int i{}; i < cubeCount; ++i)
+            for (int j{}; j < cubeCount; ++j)
+                for (int k{}; k < cubeCount; ++k)
+                    cubes[i][j][k].reset(new Cube(texture1, texture2, shader, glm::vec3(i,j,k)));
+
 
         // Setting up ImGui context:
         IMGUI_CHECKVERSION();
@@ -147,7 +157,6 @@ public:
 
     void onUpdate() override
     {
-        cube->onUpdate();
         // Toggling camera mode:
         if (cameraMode)  window.setCursorMode(SE::CursorMode::CAPTURE);
         else             window.setCursorMode(SE::CursorMode::STANDARD);
@@ -155,35 +164,39 @@ public:
 
         glm::mat4 view = camera->getViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera->FOV), (float)window.width / (float)window.height, 0.1f, 100.0f);
-        glm::mat4 mvp = projection * view * cube->getModel();
-        cube->shader.setUniform(SE::MAT4F, "u_transformation", (void*)&mvp);
 
         renderer.clear(0.2f, 0.2f, 0.2f);
-
+        {
         // Starting imgui frame:
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         {
             ImGui::Begin("##");
-
-            ImGui::Text("Cube:");
-            ImGui::SliderFloat("Mix value", &cube->mixValue, 0, 1);
-            ImGui::SliderFloat3("Position", &cube->position.x, -5, 5);
-            ImGui::SliderFloat("Size", &cube->size, 0, 1);
-            ImGui::SliderFloat3("Rotation", &cube->angle.x, 360, -360);
             ImGui::Text("Camera:");
-            ImGui::Text("Press 'C' to enable camera mode");
+            ImGui::Text("Press 'C' to toggle camera mode");
             ImGui::SliderFloat("Speed", &camera->speed, 0, 5);
-            ImGui::SliderFloat("Zoom", &camera->FOV, 10.0f, 90.0f);
+            ImGui::Text("Cubes:");
+            ImGui::SliderFloat("Mix value", &mixValue, 0, 1);
 
             ImGui::End();
         }
         ImGui::Render();
 
-        // Rendering our data:
-        renderer.draw(*cube.get());
+        }
 
+        // Updating and rendering cubes:
+        for (int i{}; i < cubeCount; ++i)
+            for (int j{}; j < cubeCount; ++j)
+                for (int k{}; k < cubeCount; ++k)
+                {
+                    auto& cube = *cubes[i][j][k].get();
+                    cube.mixValue = mixValue;
+                    cube.onUpdate();
+                    glm::mat4 mvp = projection * view * cube.getModel();
+                    cube.shader.setUniform(SE::MAT4F, "u_transformation", (void*)&mvp);
+                    renderer.draw(cube);
+                }
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
@@ -207,7 +220,7 @@ public:
 
     
     std::unique_ptr<SE::Camera> camera;
-    std::unique_ptr<Cube> cube;
+    std::unique_ptr<Cube> cubes[cubeCount][cubeCount][cubeCount];
 };
 int main()
 {
