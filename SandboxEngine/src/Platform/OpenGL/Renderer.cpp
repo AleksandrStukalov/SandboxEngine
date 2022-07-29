@@ -1,4 +1,4 @@
-#include "Rendering.h"
+#include "Graphics.h"
 #include "OpenGLContext.h"
 
 #include <glad/glad.h>
@@ -21,7 +21,7 @@ void SE::Renderer::clear(float r, float g, float b, float a)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-unsigned int getOpenGLMode(SE::DrawMode mode)
+unsigned int SE::Renderer::getPlatformDrawMode(SE::DrawMode mode)
 {
     switch (mode)
     {
@@ -42,25 +42,11 @@ void SE::Renderer::setPolygonMode(PolygonMode mode) const
     }
 }
 
-void SE::Renderer::draw(VertexArray& va, Shader& shader, std::vector<Texture*> textures, const unsigned int vertexCount, DrawMode mode)
+void SE::Renderer::draw(Mesh* mesh, Shader* shader, Texture* texture, DrawMode mode)
 {
-    shader.bind();
-    for (auto texture : textures) texture->bind();
-    va.bind();
-    glDrawArrays(getOpenGLMode(mode), 0, vertexCount);
-}
-
-void SE::Renderer::draw(VertexArray& va, IndexBuffer& ib, Shader& shader, std::vector<Texture*> textures, DrawMode mode)
-{
-    shader.bind();
-    for (auto texture : textures) texture->bind();
-    va.bind();
-    ib.bind();
-    glDrawElements(getOpenGLMode(mode), ib.vertexCount, SE::getPlatformType(ib.type), 0);
-}
-
-void SE::Renderer::draw(Object& object, DrawMode mode)
-{
-    object.bind();
-    glDrawArrays(getOpenGLMode(mode), 0, object.vertexCount);
+    mesh->va.bind();
+    shader->bind();
+    shader->setUniform(SE::INT, "u_texture", (void*)texture);
+    texture->bind();
+    glDrawArrays(this->getPlatformDrawMode(mode), 0, mesh->vertexCount);
 }

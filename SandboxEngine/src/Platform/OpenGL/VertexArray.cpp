@@ -1,4 +1,4 @@
-#include "Rendering.h"
+#include "Graphics.h"
 
 #include "glad/glad.h"
 

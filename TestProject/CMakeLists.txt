@@ -13,6 +13,7 @@ FILE(GLOB TEXTURES
 FILE(GLOB SRC 
     "${CMAKE_SOURCE_DIR}/${EXE_NAME}/src/**.h"
     "${CMAKE_SOURCE_DIR}/${EXE_NAME}/src/**.cpp"
+    "${CMAKE_SOURCE_DIR}/${EXE_NAME}/**.txt"
 )
 add_executable(${EXE_NAME}
     ${SRC}

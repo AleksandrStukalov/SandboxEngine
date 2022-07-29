@@ -1,4 +1,4 @@
-#include "Rendering/Texture.h"
+#include "Graphics/Texture.h"
 
 #define STB_IMAGE_IMPLEMENTATION // When we set it preprocessor modifies the header file such that it only contains the relevant definition source code, effectively turning the header file into a .cpp file
 #include "stb/stb_image.h"

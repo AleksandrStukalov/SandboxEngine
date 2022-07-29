@@ -7,8 +7,8 @@ FILE(GLOB INCLUDE
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/**.cpp"
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/**.h"
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/**.cpp"
-    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/Rendering/**.h"
-    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/Rendering/**.cpp"
+    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/Graphics/**.h"
+    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/Graphics/**.cpp"
 )
 FILE(GLOB GLFW
     "${CMAKE_SOURCE_DIR}/SandboxEngine/src/Platform/GLFW/**.h"
@@ -26,6 +26,7 @@ FILE(GLOB SRC
     ${GLFW}
     ${OPENGL}
     ${IMGUI}
+    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/**.txt"
 )
 add_library(${ENGINE_NAME} 
     STATIC
@@ -70,7 +71,7 @@ target_link_libraries(${ENGINE_NAME} "glfw" "glad" "glm")
 target_precompile_headers(${ENGINE_NAME}
     PRIVATE
         [["Log.h"]]
-        [["Input.h"]]
+        [["Window/Input.h"]]
         [["Types.h"]]
         
         # NOTE: 

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Window.h"
-#include "Events.h"
-#include "Rendering/Renderer.h"
+#include "Graphics/Renderer.h"
 
 namespace SE
 {

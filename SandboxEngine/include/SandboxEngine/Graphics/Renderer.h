@@ -20,7 +20,7 @@ namespace SE
     class IndexBuffer;
     class Shader;
     class Texture;
-    class Object;
+    class Mesh;
 
     class Renderer
     {
@@ -29,10 +29,9 @@ namespace SE
         void clear(float r, float g, float b, float a = 1.0f);
         void viewport(int x, int y, int width, int height);
         void setPolygonMode(PolygonMode mode) const;
+        unsigned int getPlatformDrawMode(SE::DrawMode mode);
 
-        void draw(VertexArray& va, Shader& shader, std::vector<Texture*> textures, const unsigned int vertexCount, DrawMode mode = DrawMode::TRIANGLES);
-        void draw(VertexArray& va, IndexBuffer& ib, Shader& shader, std::vector<Texture*> textures, DrawMode mode = DrawMode::TRIANGLES);
-        void draw(Object& object, DrawMode mode = DrawMode::TRIANGLES);
+        void draw(Mesh* mesh, Shader* shader, Texture* texture, DrawMode mode = DrawMode::TRIANGLES);
 
     };
 }
