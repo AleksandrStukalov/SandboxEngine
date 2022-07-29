@@ -33,9 +33,9 @@ namespace SE
             }
         }
 
-        virtual void processKeyboard() = 0;
-        virtual void processMouseMovement(float xoffset, float yoffset) = 0;
-        virtual void processScroll(float offset) = 0;
+        virtual void processKeyboard(){};
+        virtual void processMouseMovement(float xoffset, float yoffset){};
+        virtual void processScroll(float offset){};
 
         Window window;
         Events events;

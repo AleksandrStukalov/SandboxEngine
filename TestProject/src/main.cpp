@@ -17,9 +17,8 @@
 #include <sstream>
 #include <memory>
 
-// Camera:
 bool cameraMode(false);
-
+const unsigned int chunkSize = 16;
 
 class Cube : public SE::Mesh
 {
@@ -87,10 +86,6 @@ public:
         return vertices;
     }
 };
-
-const unsigned int cubeCount{ 10 };
-float mixValue{ 0.5f };
-
 class App : public SE::Application
 {
 public:
@@ -102,7 +97,13 @@ public:
         , ground(new SE::Texture("resources/textures/sod.jpg", true))
         , shader(new SE::Shader("src/shaders/basic.vert", "src/shaders/basic.frag"))
     {
-        cube.reset(new Cube());
+        // Filling cubes:
+        {
+            for (int i{}; i < chunkSize; ++i)
+                for (int j{}; j < chunkSize; ++j)
+                    for (int k{}; k < chunkSize; ++k)
+                        cubes[i][j][k] = new Cube();
+        }
 
         // Initializing ImGui:
         {
@@ -121,9 +122,12 @@ public:
 
     ~App()
     {
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
-        ImGui::DestroyContext();
+        // Finilizing ImGui:
+        {
+            ImGui_ImplOpenGL3_Shutdown();
+            ImGui_ImplGlfw_Shutdown();
+            ImGui::DestroyContext();
+        }
     }
 
     void onUpdate() override
@@ -143,25 +147,30 @@ public:
                 ImGui::Begin("##");
                 ImGui::Text("Camera:");
                 ImGui::Text("Press 'C' to toggle camera mode");
-                ImGui::SliderFloat("Speed", &camera->speed, 0, 5);
-                ImGui::Text("Cubes:");
-                ImGui::SliderFloat("Mix value", &mixValue, 0, 1);
+                ImGui::Text("Scroll to adjust speed");
+                ImGui::Text("Speed: %i", (int)camera->speed);
 
                 ImGui::End();
             }
             ImGui::Render();
         }
 
-
         // Applying transformations & Rendering:
-        glm::mat4 view = camera->getViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(camera->FOV), (float)window.width / (float)window.height, 0.1f, 100.0f);
-        glm::mat4 model(1.0f);
-        glm::mat4 mvp = projection * view * model;
-        shader.get()->setUniform(SE::MAT4F, "u_transformation", (void*)&mvp);
-        renderer.draw(cube.get(), shader.get(), sand.get());
+        {
+            glm::mat4 view = camera->getViewMatrix();
+            glm::mat4 projection = glm::perspective(glm::radians(camera->FOV), (float)window.width / (float)window.height, 0.1f, 100.0f);
 
-
+            for (int i{}; i < chunkSize; ++i)
+                for (int j{}; j < chunkSize; ++j)
+                    for (int k{}; k < chunkSize; ++k)
+                    {
+                        Cube& cube = *cubes[i][j][k];
+                        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(i, j, k));
+                        glm::mat4 mvp = projection * view * model;
+                        shader.get()->setUniform(SE::MAT4F, "u_transformation", (void*)&mvp);
+                        renderer.draw(&cube, shader.get(), sand.get());
+                    }
+        }
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
@@ -183,10 +192,10 @@ public:
 
     
     std::unique_ptr<SE::Camera> camera;
-    std::unique_ptr<Cube> cube;
     std::unique_ptr<SE::Texture> sand;
     std::unique_ptr<SE::Texture> ground;
     std::unique_ptr<SE::Shader> shader;
+    Cube* cubes[chunkSize][chunkSize][chunkSize];
 };
 int main()
 {
