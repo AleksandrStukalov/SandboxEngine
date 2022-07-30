@@ -19,6 +19,49 @@
 
 bool cameraMode(false);
 
+SE::Vertex* getCube(glm::vec3 pos)
+{
+    const float size{ 1.0f };
+    SE::Vertex* vertices = new SE::Vertex[24]
+    {
+        //// VertPos            // TexPos                      // Index
+        // Near:
+        { { pos.x - size/2, pos.y - size/2, pos.z + size/2 },    { 0, 0 } },     // Down left    0
+        { { pos.x - size/2, pos.y + size/2, pos.z + size/2 },    { 0, 1 } },     // Top left     1
+        { { pos.x + size/2, pos.y + size/2, pos.z + size/2 },    { 1, 1 } },     // Top right    2
+        { { pos.x + size/2, pos.y - size/2, pos.z + size/2 },    { 1, 0 } },     // Down right   3
+        // Far
+        { { pos.x - size/2, pos.y - size/2, pos.z - size/2 },    { 0, 0 } },     // Down left    4
+        { { pos.x - size/2, pos.y + size/2, pos.z - size/2 },    { 0, 1 } },     // Top left     5
+        { { pos.x + size/2, pos.y + size/2, pos.z - size/2 },    { 1, 1 } },     // Top right    6
+        { { pos.x + size/2, pos.y - size/2, pos.z - size/2 },    { 1, 0 } },     // Down right   7
+        // Left
+        { { pos.x - size/2, pos.y - size/2, pos.z - size/2 },    { 0, 0 } },     // Down left    8
+        { { pos.x - size/2, pos.y + size/2, pos.z - size/2 },    { 0, 1 } },     // Top left     9
+        { { pos.x - size/2, pos.y + size/2, pos.z + size/2 },    { 1, 1 } },     // Top right    10
+        { { pos.x - size/2, pos.y - size/2, pos.z + size/2 },    { 1, 0 } },     // Down right   11
+        // Right
+        { { pos.x + size/2, pos.y - size/2, pos.z + size/2 },    { 0, 0 } },     // Down left    12
+        { { pos.x + size/2, pos.y + size/2, pos.z + size/2 },    { 0, 1 } },     // Top left     13
+        { { pos.x + size/2, pos.y + size/2, pos.z - size/2 },    { 1, 1 } },     // Top right    14
+        { { pos.x + size/2, pos.y - size/2, pos.z - size/2 },    { 1, 0 } },     // Down right   15
+        // Top
+        { { pos.x - size/2, pos.y + size/2, pos.z + size/2 },    { 0, 0 } },     // Down left    16
+        { { pos.x - size/2, pos.y + size/2, pos.z - size/2 },    { 0, 1 } },     // Top left     17
+        { { pos.x + size/2, pos.y + size/2, pos.z - size/2 },    { 1, 1 } },     // Top right    18
+        { { pos.x + size/2, pos.y + size/2, pos.z + size/2 },    { 1, 0 } },     // Down right   19
+        // Bottom
+        { { pos.x - size/2, pos.y - size/2, pos.z + size/2 },    { 0, 0 } },     // Down left    20
+        { { pos.x - size/2, pos.y - size/2, pos.z - size/2 },    { 0, 1 } },     // Top left     21
+        { { pos.x + size/2, pos.y - size/2, pos.z - size/2 },    { 1, 1 } },     // Top right    22
+        { { pos.x + size/2, pos.y - size/2, pos.z + size/2 },    { 1, 0 } }      // Down right   23
+    };
+
+    return vertices;
+}
+
+glm::vec3 objPos(0.0f);
+
 class App : public SE::Application
 {
 public:
@@ -98,6 +141,8 @@ public:
                 ImGui::Text("Press 'C' to toggle camera mode");
                 ImGui::Text("Scroll to adjust speed");
                 ImGui::Text("Speed: %i", (int)camera->speed);
+                ImGui::Text("Object:");
+                ImGui::SliderFloat3("Object position", &objPos.x, -10.0f, 10.0f);
 
                 ImGui::End();
             }
@@ -112,44 +157,11 @@ public:
             glm::mat4 mvp = projection * view * model;
             shader->setUniform(SE::MAT4F, "u_transformation", (void*)&mvp);
 
-            SE::Vertex vertices[36]
-            {
-                //// VertPos            // TexPos                       // Index
-                // Near:
-                { { -0.5, -0.5, 0.5 },  { 0, 0 } },     // Down left    0
-                { { -0.5, 0.5, 0.5 },   { 0, 1 } },     // Top left     1
-                { { 0.5, 0.5, 0.5 },    { 1, 1 } },     // Top right    2
-                { { 0.5, -0.5, 0.5 },   { 1, 0 } },     // Down right   3
-                // Far
-                { { 0.5, -0.5, -0.5 },  { 0, 0 } },     // Down left    4
-                { { 0.5, 0.5, -0.5 },   { 0, 1 } },     // Top left     5
-                { { -0.5, 0.5, -0.5 },  { 1, 1 } },     // Top right    6
-                { { -0.5, -0.5, -0.5 }, { 1, 0 } },     // Down right   7
-                // Left
-                { { -0.5, -0.5, -0.5 }, { 0, 0 } },     // Down left    8
-                { { -0.5, 0.5, -0.5 },  { 0, 1 } },    // Top left     9
-                { { -0.5, 0.5,  0.5 },  { 1, 1 } },     // Top right    10
-                { { -0.5, -0.5, 0.5 },  { 1, 0 } },     // Down right   11
-                // Right
-                { { 0.5, -0.5, 0.5 },   { 0, 0 } },     // Down left    12
-                { { 0.5, 0.5, 0.5 },    { 0, 1 } },     // Top left     13
-                { { 0.5, 0.5, -0.5 },   { 1, 1 } },     // Top right    14
-                { { 0.5, -0.5, -0.5 },  { 1, 0 } },     // Down right   15
-                // Top
-                { { -0.5, 0.5, 0.5 },   { 0, 0 } },     // Down left    16
-                { { -0.5, 0.5, -0.5 },  { 0, 1 } },     // Top left     17
-                { { 0.5, 0.5, -0.5 },   { 1, 1 } },     // Top right    18
-                { { 0.5, 0.5, 0.5 },    { 1, 0 } },     // Down right   19
-                // Bottom
-                { { -0.5, -0.5, -0.5 }, { 0, 0 } },     // Down left    20
-                { { -0.5, -0.5, 0.5 },  { 0, 1 } },     // Top left     21
-                { { 0.5, -0.5, 0.5 },   { 1, 1 } },     // Top right    22
-                { { 0.5, -0.5, -0.5 },  { 1, 0 } }      // Down right   23
-            };
+            std::unique_ptr<SE::Vertex> vertices(getCube(objPos));
 
             // Setting dynamic VB:
             mesh->vb.bind();
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(SE::Vertex) * 24, vertices.get());
 
             //Rendering:
             renderer.draw(*mesh.get(), *ib.get(), *shader.get(), *sod.get());
