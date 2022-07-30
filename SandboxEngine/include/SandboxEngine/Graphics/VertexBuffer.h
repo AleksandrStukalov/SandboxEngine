@@ -6,10 +6,16 @@
 
 namespace SE
 {
+    enum VBusage
+    {
+        STATIC_DRAW,
+        DYNAMIC_DRAW
+    };
+    unsigned int getPlatformVBusage(VBusage usage);
     class VertexBuffer
     {
     public:
-        VertexBuffer(void* vertices, unsigned int size);
+        VertexBuffer(void* vertices, unsigned int size, VBusage usage);
         ~VertexBuffer();
         void bind();
 

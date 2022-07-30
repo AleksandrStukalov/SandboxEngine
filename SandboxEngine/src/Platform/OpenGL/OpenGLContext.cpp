@@ -79,9 +79,10 @@ void SE::OpenGLContext::init()
 #endif //NDEBUG
 
     // Configurating state:
-    glEnable(GL_DEPTH_TEST);
+     glEnable(GL_DEPTH_TEST);
+//
+//    glEnable(GL_CULL_FACE);
+//    glFrontFace(GL_CW);// Sets triangles, that get rendered in clockwise order, as front-fasing.
+//    glCullFace(GL_BACK);// Sets back-facing triangles to be culled.
 
-    glEnable(GL_CULL_FACE);
-    glFrontFace(GL_CW);// Sets triangles, that get rendered in clockwise order, as front-fasing.
-    glCullFace(GL_BACK);// Sets back-facing triangles to be culled.
 }

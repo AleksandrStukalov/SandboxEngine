@@ -18,74 +18,7 @@
 #include <memory>
 
 bool cameraMode(false);
-const unsigned int chunkSize = 16;
 
-class Cube : public SE::Mesh
-{
-public:
-    Cube() : Mesh(getVertices(), 36) {}
-    SE::Vertex* getVertices()
-    {
-        SE::Vertex* vertices = new SE::Vertex[36];
-        {
-            //                       // Positions         // TexPos
-            // Near:
-            vertices[0] = SE::Vertex({ -0.5, -0.5, 0.5 }, { 0, 0 });     // Down left 
-            vertices[1] = SE::Vertex({ -0.5, 0.5, 0.5 }, { 0, 1 });     // Top left  
-            vertices[2] = SE::Vertex({ 0.5, 0.5, 0.5 }, { 1, 1 });     // Top right 
-
-            vertices[3] = SE::Vertex({ 0.5, 0.5, 0.5 }, { 1, 1 });     // Top right 
-            vertices[4] = SE::Vertex({ 0.5, -0.5, 0.5 }, { 1, 0 });     // Down right
-            vertices[5] = SE::Vertex({ -0.5, -0.5, 0.5 }, { 0, 0 });     // Down left 
-
-            // Far:
-            vertices[6] = SE::Vertex({ 0.5, -0.5, -0.5 }, { 0, 0 });     // Down right
-            vertices[7] = SE::Vertex({ 0.5, 0.5, -0.5 }, { 0, 1 });     // Top right 
-            vertices[8] = SE::Vertex({ -0.5, 0.5, -0.5 }, { 1, 1 });     // Top left  
-
-            vertices[9] = SE::Vertex({ -0.5, 0.5, -0.5 }, { 1, 1 });     // Top left  
-            vertices[10] = SE::Vertex({ -0.5, -0.5, -0.5 }, { 1, 0 });     // Down left 
-            vertices[11] = SE::Vertex({ 0.5, -0.5, -0.5 }, { 0, 0 });     // Down right
-
-            // Left:
-            vertices[12] = SE::Vertex({ -0.5, -0.5, -0.5 }, { 0, 0 });     // Down left 
-            vertices[13] = SE::Vertex({ -0.5, 0.5, -0.5 }, { 0, 1 });     // Top left  
-            vertices[14] = SE::Vertex({ -0.5, 0.5, 0.5 }, { 1, 1 });     // Top left  
-
-            vertices[15] = SE::Vertex({ -0.5, 0.5, 0.5 }, { 1, 1 });     // Top left  
-            vertices[16] = SE::Vertex({ -0.5, -0.5, 0.5 }, { 1, 0 });     // Down left 
-            vertices[17] = SE::Vertex({ -0.5, -0.5, -0.5 }, { 0, 0 });     // Down left 
-
-            // Right:
-            vertices[18] = SE::Vertex({ 0.5, -0.5, 0.5 }, { 0, 0 });     // Down right
-            vertices[19] = SE::Vertex({ 0.5, 0.5, 0.5 }, { 0, 1 });     // Top right 
-            vertices[20] = SE::Vertex({ 0.5, 0.5, -0.5 }, { 1, 1 });     // Top right 
-            vertices[21] = SE::Vertex({ 0.5, 0.5, -0.5 }, { 1, 1 });     // Top right 
-            vertices[22] = SE::Vertex({ 0.5, -0.5, -0.5 }, { 1, 0 });     // Down right
-            vertices[23] = SE::Vertex({ 0.5, -0.5, 0.5 }, { 0, 0 });     // Down right
-
-            // Top:
-            vertices[24] = SE::Vertex({ -0.5, 0.5, 0.5 }, { 0, 0 });     // Top left  
-            vertices[25] = SE::Vertex({ -0.5, 0.5, -0.5 }, { 0, 1 });     // Top left  
-            vertices[26] = SE::Vertex({ 0.5, 0.5, -0.5 }, { 1, 1 });     // Top right 
-
-            vertices[27] = SE::Vertex({ 0.5, 0.5, -0.5 }, { 1, 1 });     // Top right 
-            vertices[28] = SE::Vertex({ 0.5, 0.5, 0.5 }, { 1, 0 });     // Top right 
-            vertices[29] = SE::Vertex({ -0.5, 0.5, 0.5 }, { 0, 0 });     // Top left  
-
-            // Bottom:
-            vertices[30] = SE::Vertex({ 0.5, -0.5, -0.5 }, { 1, 0 });     // Down right
-            vertices[31] = SE::Vertex({ -0.5, -0.5, -0.5 }, { 0, 0 });     // Down left 
-            vertices[32] = SE::Vertex({ -0.5, -0.5, 0.5 }, { 0, 1 });     // Down left 
-
-            vertices[33] = SE::Vertex({ -0.5, -0.5, 0.5 }, { 0, 1 });     // Down left 
-            vertices[34] = SE::Vertex({ 0.5, -0.5, 0.5 }, { 1, 1 });     // Down right
-            vertices[35] = SE::Vertex({ 0.5, -0.5, -0.5 }, { 1, 0 });     // Down right
-        }
-
-        return vertices;
-    }
-};
 class App : public SE::Application
 {
 public:
@@ -94,16 +27,32 @@ public:
         : Application("App", 1920, 1080)
         , camera(new SE::Camera(glm::vec3(0, 0, 20)))
         , sand(new SE::Texture("resources/textures/sand.png"))
-        , ground(new SE::Texture("resources/textures/sod.jpg", true))
+        , sod(new SE::Texture("resources/textures/sod.jpg", true))
         , shader(new SE::Shader("src/shaders/basic.vert", "src/shaders/basic.frag"))
+        , mesh(new SE::Mesh(nullptr, 36 * sizeof(SE::Vertex), SE::DYNAMIC_DRAW)) // Just allocating space)
     {
-        // Filling cubes:
+        unsigned int indices[]
         {
-            for (int i{}; i < chunkSize; ++i)
-                for (int j{}; j < chunkSize; ++j)
-                    for (int k{}; k < chunkSize; ++k)
-                        cubes[i][j][k] = new Cube();
-        }
+            // Near:
+            0, 1, 2,
+            2, 3, 0,
+            // Far:
+            4, 5, 6,
+            6, 7, 4,
+            // Left:
+            8, 9, 10,
+            10, 11, 8,
+            // Right:
+            12, 13, 14,
+            14, 15, 12,
+            // Top:
+            16, 17, 18,
+            18, 19, 16,
+            // Bottom:
+            20, 21, 22,
+            22, 23, 20
+        };
+        ib.reset(new SE::IndexBuffer(indices, SE::UNSIGNED_INT, sizeof(indices)));
 
         // Initializing ImGui:
         {
@@ -155,21 +104,55 @@ public:
             ImGui::Render();
         }
 
-        // Applying transformations & Rendering:
+        // Transforming & Rendering:
         {
             glm::mat4 view = camera->getViewMatrix();
             glm::mat4 projection = glm::perspective(glm::radians(camera->FOV), (float)window.width / (float)window.height, 0.1f, 100.0f);
+            glm::mat4 model(1.0f);
+            glm::mat4 mvp = projection * view * model;
+            shader->setUniform(SE::MAT4F, "u_transformation", (void*)&mvp);
 
-            for (int i{}; i < chunkSize; ++i)
-                for (int j{}; j < chunkSize; ++j)
-                    for (int k{}; k < chunkSize; ++k)
-                    {
-                        Cube& cube = *cubes[i][j][k];
-                        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(i, j, k));
-                        glm::mat4 mvp = projection * view * model;
-                        shader.get()->setUniform(SE::MAT4F, "u_transformation", (void*)&mvp);
-                        renderer.draw(&cube, shader.get(), sand.get());
-                    }
+            SE::Vertex vertices[36]
+            {
+                //// VertPos            // TexPos                       // Index
+                // Near:
+                { { -0.5, -0.5, 0.5 },  { 0, 0 } },     // Down left    0
+                { { -0.5, 0.5, 0.5 },   { 0, 1 } },     // Top left     1
+                { { 0.5, 0.5, 0.5 },    { 1, 1 } },     // Top right    2
+                { { 0.5, -0.5, 0.5 },   { 1, 0 } },     // Down right   3
+                // Far
+                { { 0.5, -0.5, -0.5 },  { 0, 0 } },     // Down left    4
+                { { 0.5, 0.5, -0.5 },   { 0, 1 } },     // Top left     5
+                { { -0.5, 0.5, -0.5 },  { 1, 1 } },     // Top right    6
+                { { -0.5, -0.5, -0.5 }, { 1, 0 } },     // Down right   7
+                // Left
+                { { -0.5, -0.5, -0.5 }, { 0, 0 } },     // Down left    8
+                { { -0.5, 0.5, -0.5 },  { 0, 1 } },    // Top left     9
+                { { -0.5, 0.5,  0.5 },  { 1, 1 } },     // Top right    10
+                { { -0.5, -0.5, 0.5 },  { 1, 0 } },     // Down right   11
+                // Right
+                { { 0.5, -0.5, 0.5 },   { 0, 0 } },     // Down left    12
+                { { 0.5, 0.5, 0.5 },    { 0, 1 } },     // Top left     13
+                { { 0.5, 0.5, -0.5 },   { 1, 1 } },     // Top right    14
+                { { 0.5, -0.5, -0.5 },  { 1, 0 } },     // Down right   15
+                // Top
+                { { -0.5, 0.5, 0.5 },   { 0, 0 } },     // Down left    16
+                { { -0.5, 0.5, -0.5 },  { 0, 1 } },     // Top left     17
+                { { 0.5, 0.5, -0.5 },   { 1, 1 } },     // Top right    18
+                { { 0.5, 0.5, 0.5 },    { 1, 0 } },     // Down right   19
+                // Bottom
+                { { -0.5, -0.5, -0.5 }, { 0, 0 } },     // Down left    20
+                { { -0.5, -0.5, 0.5 },  { 0, 1 } },     // Top left     21
+                { { 0.5, -0.5, 0.5 },   { 1, 1 } },     // Top right    22
+                { { 0.5, -0.5, -0.5 },  { 1, 0 } }      // Down right   23
+            };
+
+            // Setting dynamic VB:
+            mesh->vb.bind();
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+
+            //Rendering:
+            renderer.draw(*mesh.get(), *ib.get(), *shader.get(), *sod.get());
         }
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -193,10 +176,12 @@ public:
     
     std::unique_ptr<SE::Camera> camera;
     std::unique_ptr<SE::Texture> sand;
-    std::unique_ptr<SE::Texture> ground;
+    std::unique_ptr<SE::Texture> sod;
     std::unique_ptr<SE::Shader> shader;
-    Cube* cubes[chunkSize][chunkSize][chunkSize];
+    std::unique_ptr<SE::Mesh> mesh;
+    std::unique_ptr<SE::IndexBuffer> ib;
 };
+
 int main()
 {
     App().update();

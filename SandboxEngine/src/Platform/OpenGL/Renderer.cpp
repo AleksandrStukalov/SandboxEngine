@@ -21,7 +21,7 @@ void SE::Renderer::clear(float r, float g, float b, float a)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-unsigned int SE::Renderer::getPlatformDrawMode(SE::DrawMode mode)
+unsigned int SE::getPlatformDrawMode(SE::DrawMode mode)
 {
     switch (mode)
     {
@@ -42,11 +42,22 @@ void SE::Renderer::setPolygonMode(PolygonMode mode) const
     }
 }
 
-void SE::Renderer::draw(Mesh* mesh, Shader* shader, Texture* texture, DrawMode mode)
+void SE::Renderer::draw(Mesh& mesh, Shader& shader, Texture& texture, DrawMode mode)
 {
-    mesh->va.bind();
-    shader->bind();
-    shader->setUniform(SE::INT, "u_texture", (void*)texture);
-    texture->bind();
-    glDrawArrays(this->getPlatformDrawMode(mode), 0, mesh->vertexCount);
+    mesh.va.bind();
+    shader.bind();
+    shader.setUniform(SE::INT, "u_texture", (void*)texture.slot);
+    texture.bind();
+    glDrawArrays(getPlatformDrawMode(mode), 0, mesh.vertexCount);
 }
+
+void SE::Renderer::draw(Mesh& mesh, IndexBuffer& ib, Shader& shader, Texture& texture, DrawMode mode)
+{
+    shader.bind();
+    mesh.va.bind();
+    ib.bind();
+    shader.setUniform(SE::INT, "u_texture", (void*)&texture.slot);
+    texture.bind();
+    glDrawElements(getPlatformDrawMode(mode), ib.vertexCount, getPlatformType(ib.type), 0);
+}
+

@@ -1,5 +1,4 @@
 #pragma once
-#include "SandboxEngine/Maths.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -13,20 +12,20 @@ namespace SE
 {
     struct Vertex
     {
-        SE::Vec3f position;
-        SE::Vec2f texPos;
+        glm::vec3 vertPos;
+        glm::vec2 texPos;
 
         Vertex() {}
-        Vertex(SE::Vec3f position, SE::Vec2f texPos)
-            : position(position), texPos(texPos) {}
+        Vertex(glm::vec3 vertPos, glm::vec2 texPos)
+            : vertPos(vertPos), texPos(texPos) {}
     };
     class Mesh
     {
     public:
-        Mesh(Vertex* vertices, const unsigned int vertexCount)
-            : vertexCount(vertexCount)
+        inline Mesh(Vertex* vertices, unsigned int size, VBusage usage)
+            : vertexCount(size / sizeof(Vertex))
             , vertices(vertices)
-            , vb(vertices, sizeof(Vertex) * vertexCount)
+            , vb(vertices, size, usage)
         {
             SE::VertexAttribute positions(3, SE::FLOAT);
             SE::VertexAttribute texPos(2, SE::FLOAT);
