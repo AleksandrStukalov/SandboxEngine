@@ -14,11 +14,12 @@ unsigned int SE::getPlatformBufferUsage(SE::BufferUsage usage)
 }
 
 // Vertex buffer:
-SE::VertexBuffer::VertexBuffer(void* vertices, unsigned int size, SE::BufferUsage usage)
+SE::VertexBuffer::VertexBuffer(void* data, unsigned int size, SE::BufferUsage usage)
+    : usage(usage)
 {
     glGenBuffers(1, &id);
     bind();
-    glBufferData(GL_ARRAY_BUFFER, size, vertices, getPlatformBufferUsage(usage));
+    glBufferData(GL_ARRAY_BUFFER, size, data, getPlatformBufferUsage(usage));
 }
 
 SE::VertexBuffer::~VertexBuffer()
@@ -29,6 +30,13 @@ SE::VertexBuffer::~VertexBuffer()
 void SE::VertexBuffer::bind()
 {
     glBindBuffer(GL_ARRAY_BUFFER, id);
+}
+
+void SE::VertexBuffer::add(void* data, unsigned int size, unsigned int offset)
+{
+    if (usage != SE::DYNAMIC_DRAW) SE::Log::error({ "Can't add data to static buffer" });
+    bind();
+    glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 }
 
 // Index buffer:

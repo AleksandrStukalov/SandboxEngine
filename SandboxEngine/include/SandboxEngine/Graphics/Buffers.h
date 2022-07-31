@@ -16,12 +16,14 @@ namespace SE
     class VertexBuffer
     {
     public:
-        VertexBuffer(void* vertices, unsigned int size, BufferUsage usage);
+        VertexBuffer(void* data, unsigned int size, BufferUsage usage);
         ~VertexBuffer();
         void bind();
+        void add(void* data, unsigned int size, unsigned int offset);// NOTE: We can't calculate offset automatically, because it has to be set to zero every frame.
 
     private:
         unsigned int id;
+        BufferUsage usage;
     };
 
     class IndexBuffer
