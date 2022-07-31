@@ -22,72 +22,56 @@ bool cameraMode(false);
 
 SE::Vertex* getCube(glm::vec3 pos, float size)
 {
-    return new SE::Vertex[36]
+    return new SE::Vertex[24]
     {
         //// VertPos            // TexPos                      // Index
         // Near:
         { { pos.x - size / 2, pos.y - size / 2, pos.z + size / 2 },    { 0, 0 } },     // Down left    0
         { { pos.x - size / 2, pos.y + size / 2, pos.z + size / 2 },    { 0, 1 } },     // Top left     1
         { { pos.x + size / 2, pos.y + size / 2, pos.z + size / 2 },    { 1, 1 } },     // Top right    2
-
-        { { pos.x + size / 2, pos.y + size / 2, pos.z + size / 2 },    { 1, 1 } },     // Top right    2
         { { pos.x + size / 2, pos.y - size / 2, pos.z + size / 2 },    { 1, 0 } },     // Down right   3
-        { { pos.x - size / 2, pos.y - size / 2, pos.z + size / 2 },    { 0, 0 } },     // Down left    0
 
         // Far
         { { pos.x - size / 2, pos.y - size / 2, pos.z - size / 2 },    { 0, 0 } },     // Down left    4
         { { pos.x - size / 2, pos.y + size / 2, pos.z - size / 2 },    { 0, 1 } },     // Top left     5
         { { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    6
-
-        { { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    6
         { { pos.x + size / 2, pos.y - size / 2, pos.z - size / 2 },    { 1, 0 } },     // Down right   7
-        { { pos.x - size / 2, pos.y - size / 2, pos.z - size / 2 },    { 0, 0 } },     // Down left    4
 
         // Left
         { { pos.x - size / 2, pos.y - size / 2, pos.z - size / 2 },    { 0, 0 } },     // Down left    8
         { { pos.x - size / 2, pos.y + size / 2, pos.z - size / 2 },    { 0, 1 } },     // Top left     9
         { { pos.x - size / 2, pos.y + size / 2, pos.z + size / 2 },    { 1, 1 } },     // Top right    10
-
-        { { pos.x - size / 2, pos.y + size / 2, pos.z + size / 2 },    { 1, 1 } },     // Top right    10
         { { pos.x - size / 2, pos.y - size / 2, pos.z + size / 2 },    { 1, 0 } },     // Down right   11
-        { { pos.x - size / 2, pos.y - size / 2, pos.z - size / 2 },    { 0, 0 } },     // Down left    8
         
         // Right
         { { pos.x + size / 2, pos.y - size / 2, pos.z + size / 2 },    { 0, 0 } },     // Down left    12
         { { pos.x + size / 2, pos.y + size / 2, pos.z + size / 2 },    { 0, 1 } },     // Top left     13
         { { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    14
-
-        { { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    14
         { { pos.x + size / 2, pos.y - size / 2, pos.z - size / 2 },    { 1, 0 } },     // Down right   15
-        { { pos.x + size / 2, pos.y - size / 2, pos.z + size / 2 },    { 0, 0 } },     // Down left    12
+
         // Top
         { { pos.x - size / 2, pos.y + size / 2, pos.z + size / 2 },    { 0, 0 } },     // Down left    16
         { { pos.x - size / 2, pos.y + size / 2, pos.z - size / 2 },    { 0, 1 } },     // Top left     17
         { { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    18
-        
-        { { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    18
         { { pos.x + size / 2, pos.y + size / 2, pos.z + size / 2 },    { 1, 0 } },     // Down right   19
-        { { pos.x - size / 2, pos.y + size / 2, pos.z + size / 2 },    { 0, 0 } },     // Down left    16
         
         // Bottom
         { { pos.x - size / 2, pos.y - size / 2, pos.z + size / 2 },    { 0, 0 } },     // Down left    20
         { { pos.x - size / 2, pos.y - size / 2, pos.z - size / 2 },    { 0, 1 } },     // Top left     21
         { { pos.x + size / 2, pos.y - size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    22
-
-        { { pos.x + size / 2, pos.y - size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    22
         { { pos.x + size / 2, pos.y - size / 2, pos.z + size / 2 },    { 1, 0 } },     // Down right   23
-        { { pos.x - size / 2, pos.y - size / 2, pos.z + size / 2 },    { 0, 0 } }      // Down left    20
     };
 }
 
-glm::vec3 firstCubePos(1.0f, -5.0f, 0.0f);
+glm::vec3 firstCubePos(1.0f, 0.0f, 0.0f);
 float firstCubeSize(1.0f);
 
-glm::vec3 secondCubePos(0.0f, 5.0f, 0.0f);
+glm::vec3 secondCubePos(0.0f, 0.0f, 0.0f);
 float secondCubeSize(1.0f);
 
 const static unsigned int cubeCount = 2;
-const unsigned int vertexCount = cubeCount * 36;
+const static unsigned int maxVertexCount = cubeCount * 24;
+const static unsigned int maxIndexCount = cubeCount * 36;
 
 class App : public SE::Application
 {
@@ -110,73 +94,75 @@ public:
     App()
         : Application("App", 1920, 1080)
         , camera(new SE::Camera(glm::vec3(0, 0, 20)))
-        , sand(new SE::Texture("resources/textures/sand.png"))
-        , sod(new SE::Texture("resources/textures/sod.jpg", true))
-        , shader(new SE::Shader("src/shaders/basic.vert", "src/shaders/basic.frag"))
-        , mesh(new SE::Mesh(nullptr, sizeof(SE::Vertex) * 36 * cubeCount, SE::DYNAMIC_DRAW)) // Just allocating space)
+        , sand(new SE::Texture("D:/Development/SandboxEngine/TestProject/resources/textures/sand.png"))
+        , sod(new SE::Texture("D:/Development/SandboxEngine/TestProject/resources/textures/sod.jpg", true))
+        , shader(new SE::Shader("D:/Development/SandboxEngine/TestProject/src/shaders/basic.vert", "D:/Development/SandboxEngine/TestProject/src/shaders/basic.frag"))
+        , mesh(new SE::Mesh(nullptr, sizeof(SE::Vertex) * 24 * cubeCount, SE::DYNAMIC_DRAW)) // Just allocating space)
     {
+        unsigned int indices[maxIndexCount];
+        unsigned int offset{ 0 };
+        for (unsigned int i{}; i < maxIndexCount; i += 36)
         {
-            //unsigned int indices[indexCount];
-            //unsigned int offset{ 0 };
-            //for (unsigned int i{}; i < indexCount; i += 36)
-            //{
-            //    // Near:
-            //    indices[i + 0] = offset + 0;
-            //    indices[i + 1] = offset + 1;
-            //    indices[i + 2] = offset + 2;
+            // Near:
+            indices[i + 0] = offset + 0;
+            indices[i + 1] = offset + 1;
+            indices[i + 2] = offset + 2;
 
-            //    indices[i + 3] = offset + 2;
-            //    indices[i + 4] = offset + 3;
-            //    indices[i + 5] = offset + 0;
+            indices[i + 3] = offset + 2;
+            indices[i + 4] = offset + 3;
+            indices[i + 5] = offset + 0;
 
-            //    // Far:
-            //    indices[i + 6] = offset + 4;
-            //    indices[i + 7] = offset + 5;
-            //    indices[i + 8] = offset + 6;
+            // Far:
+            indices[i + 6] = offset + 4;
+            indices[i + 7] = offset + 5;
+            indices[i + 8] = offset + 6;
 
-            //    indices[i + 9] = offset + 6;
-            //    indices[i + 10] = offset + 7;
-            //    indices[i + 11] = offset + 4;
+            indices[i + 9] = offset + 6;
+            indices[i + 10] = offset + 7;
+            indices[i + 11] = offset + 4;
 
-            //    // Left:
-            //    indices[i + 12] = offset + 8;
-            //    indices[i + 13] = offset + 9;
-            //    indices[i + 14] = offset + 10;
+            // Left:
+            indices[i + 12] = offset + 8;
+            indices[i + 13] = offset + 9;
+            indices[i + 14] = offset + 10;
 
-            //    indices[i + 15] = offset + 10;
-            //    indices[i + 16] = offset + 11;
-            //    indices[i + 17] = offset + 8;
+            indices[i + 15] = offset + 10;
+            indices[i + 16] = offset + 11;
+            indices[i + 17] = offset + 8;
 
-            //    // Right:
-            //    indices[i + 18] = offset + 12;
-            //    indices[i + 19] = offset + 13;
-            //    indices[i + 20] = offset + 14;
+            // Right:
+            indices[i + 18] = offset + 12;
+            indices[i + 19] = offset + 13;
+            indices[i + 20] = offset + 14;
 
-            //    indices[i + 21] = offset + 14;
-            //    indices[i + 22] = offset + 15;
-            //    indices[i + 23] = offset + 12;
+            indices[i + 21] = offset + 14;
+            indices[i + 22] = offset + 15;
+            indices[i + 23] = offset + 12;
 
-            //    // Top:
-            //    indices[i + 24] = offset + 16;
-            //    indices[i + 25] = offset + 17;
-            //    indices[i + 26] = offset + 18;
+            // Top:
+            indices[i + 24] = offset + 16;
+            indices[i + 25] = offset + 17;
+            indices[i + 26] = offset + 18;
 
-            //    indices[i + 27] = offset + 18;
-            //    indices[i + 28] = offset + 19;
-            //    indices[i + 29] = offset + 16;
+            indices[i + 27] = offset + 18;
+            indices[i + 28] = offset + 19;
+            indices[i + 29] = offset + 16;
 
-            //    // Bottom:
-            //    indices[i + 30] = offset + 20;
-            //    indices[i + 31] = offset + 21;
-            //    indices[i + 32] = offset + 22;
+            // Bottom:
+            indices[i + 30] = offset + 20;
+            indices[i + 31] = offset + 21;
+            indices[i + 32] = offset + 22;
 
-            //    indices[i + 33] = offset + 22;
-            //    indices[i + 34] = offset + 23;
-            //    indices[i + 35] = offset + 20;
-            //}
+            indices[i + 33] = offset + 22;
+            indices[i + 34] = offset + 23;
+            indices[i + 35] = offset + 20;
 
-            //ib.reset(new SE::IndexBuffer(indices, SE::UNSIGNED_INT, sizeof(indices), SE::STATIC_DRAW));
+            offset += 24;
         }
+
+        mesh->va.bind();
+        ib.reset(new SE::IndexBuffer(indices, SE::UNSIGNED_INT, sizeof(indices), SE::STATIC_DRAW));
+        
             
         // Initializing ImGui:
         {
@@ -248,12 +234,11 @@ public:
 
             // Setting dynamic VB:
             mesh->vb.bind();
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(SE::Vertex) * 36, firstCubeVertices.get());
-            glBufferSubData(GL_ARRAY_BUFFER, sizeof(SE::Vertex) * 36, sizeof(SE::Vertex) * 36, secondCubeVertices.get());
-
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(SE::Vertex) * 24, secondCubeVertices.get());
+            glBufferSubData(GL_ARRAY_BUFFER, sizeof(SE::Vertex) * 24, sizeof(SE::Vertex) * 24, firstCubeVertices.get());
 
             //Rendering:
-            renderer.draw(*mesh.get(), *shader.get(), *sod.get());
+            renderer.draw(*mesh.get(), *ib.get(), *shader.get(), *sod.get());
         }
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -264,6 +249,7 @@ public:
     std::unique_ptr<SE::Texture> sod;
     std::unique_ptr<SE::Shader> shader;
     std::unique_ptr<SE::Mesh> mesh;
+    std::unique_ptr<SE::IndexBuffer> ib;
 };
 
 int main()
