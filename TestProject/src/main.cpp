@@ -69,9 +69,10 @@ float firstCubeSize(1.0f);
 glm::vec3 secondCubePos(0.0f, 0.0f, 0.0f);
 float secondCubeSize(1.0f);
 
-const static unsigned int cubeCount = 2;
-const static unsigned int maxVertexCount = cubeCount * 24;
-const static unsigned int maxIndexCount = cubeCount * 36;
+const static unsigned int cubeCount = 16;
+const static unsigned int cubeCountP3 = cubeCount * cubeCount * cubeCount;
+const static unsigned int maxVertexCount = cubeCountP3 * 24;
+const static unsigned int maxIndexCount = cubeCountP3  * 36;
 
 class App : public SE::Application
 {
@@ -97,7 +98,7 @@ public:
         , sand(new SE::Texture("D:/Development/SandboxEngine/TestProject/resources/textures/sand.png"))
         , sod(new SE::Texture("D:/Development/SandboxEngine/TestProject/resources/textures/sod.jpg", true))
         , shader(new SE::Shader("D:/Development/SandboxEngine/TestProject/src/shaders/basic.vert", "D:/Development/SandboxEngine/TestProject/src/shaders/basic.frag"))
-        , mesh(new SE::Mesh(nullptr, sizeof(SE::Vertex) * 24 * cubeCount, SE::DYNAMIC_DRAW)) // Just allocating space)
+        , mesh(new SE::Mesh(nullptr, sizeof(SE::Vertex) * maxVertexCount, SE::DYNAMIC_DRAW)) // Just allocating space)
     {
         unsigned int indices[maxIndexCount];
         unsigned int offset{ 0 };
@@ -229,13 +230,18 @@ public:
             glm::mat4 vp = projection * view;
             shader->setUniform(SE::MAT4F, "u_transformation", (void*)&vp);
 
-            std::unique_ptr<SE::Vertex> firstCubeVertices(getCube(firstCubePos, firstCubeSize));
-            std::unique_ptr<SE::Vertex> secondCubeVertices(getCube(secondCubePos, secondCubeSize));
-
-            // Setting dynamic VB:
-            mesh->vb.bind();
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(SE::Vertex) * 24, secondCubeVertices.get());
-            glBufferSubData(GL_ARRAY_BUFFER, sizeof(SE::Vertex) * 24, sizeof(SE::Vertex) * 24, firstCubeVertices.get());
+            // Updating cubes:
+            unsigned int offset{ 0 };
+            unsigned int size = sizeof(SE::Vertex) * 24;
+            for (int x{}; x < cubeCount; ++x)
+                for (int y{}; y < cubeCount; ++y)
+                    for (int z{}; z < cubeCount; ++z)
+                    {
+                        std::unique_ptr<SE::Vertex> vertices(getCube(glm::vec3(x, y, z), 1.0f));
+                        mesh->vb.bind();
+                        glBufferSubData(GL_ARRAY_BUFFER, offset, size, vertices.get());
+                        offset += size;
+                    }
 
             //Rendering:
             renderer.draw(*mesh.get(), *ib.get(), *shader.get(), *sod.get());
