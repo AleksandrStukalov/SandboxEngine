@@ -22,7 +22,7 @@ namespace SE
     class Mesh
     {
     public:
-        inline Mesh(Vertex* vertices, unsigned int size, VBusage usage)
+        inline Mesh(Vertex* vertices, unsigned int size, BufferUsage usage)
             : vertexCount(size / sizeof(Vertex))
             , vertices(vertices)
             , vb(vertices, size, usage)

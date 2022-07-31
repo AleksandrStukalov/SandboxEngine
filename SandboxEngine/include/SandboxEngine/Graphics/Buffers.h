@@ -6,16 +6,17 @@
 
 namespace SE
 {
-    enum VBusage
+    enum Type;
+    enum BufferUsage
     {
         STATIC_DRAW,
         DYNAMIC_DRAW
     };
-    unsigned int getPlatformVBusage(VBusage usage);
+    unsigned int getPlatformBufferUsage(BufferUsage usage);
     class VertexBuffer
     {
     public:
-        VertexBuffer(void* vertices, unsigned int size, VBusage usage);
+        VertexBuffer(void* vertices, unsigned int size, BufferUsage usage);
         ~VertexBuffer();
         void bind();
 
@@ -23,7 +24,19 @@ namespace SE
         unsigned int id;
     };
 
-    enum Type;
+    class IndexBuffer
+    {
+    public:
+        IndexBuffer(void* indices, SE::Type type, unsigned int size, BufferUsage usage);
+        ~IndexBuffer();
+        void bind();
+
+        SE::Type type;
+        unsigned int indexCount;
+    private:
+        unsigned int id;
+    };
+
     class VertexAttribute
     {
     public:
@@ -49,5 +62,17 @@ namespace SE
         unsigned int stride{ 0 };// NOTE: Must be initialized!
 
         std::vector<VertexAttribute*> attributes;
+    };
+
+    class VertexArray
+    {
+    public:
+        VertexArray();
+        ~VertexArray();
+        void bind();
+        void add(VertexBuffer& vb, VertexBufferLayout& layout);
+
+    private:
+        unsigned int id;
     };
 }

@@ -46,8 +46,8 @@ void SE::Renderer::draw(Mesh& mesh, Shader& shader, Texture& texture, DrawMode m
 {
     mesh.va.bind();
     shader.bind();
-    shader.setUniform(SE::INT, "u_texture", (void*)texture.slot);
     texture.bind();
+    shader.setUniform(SE::INT, "u_texture", (void*)&texture.slot);
     glDrawArrays(getPlatformDrawMode(mode), 0, mesh.vertexCount);
 }
 
@@ -58,6 +58,6 @@ void SE::Renderer::draw(Mesh& mesh, IndexBuffer& ib, Shader& shader, Texture& te
     ib.bind();
     shader.setUniform(SE::INT, "u_texture", (void*)&texture.slot);
     texture.bind();
-    glDrawElements(getPlatformDrawMode(mode), ib.vertexCount, getPlatformType(ib.type), 0);
+    glDrawElements(getPlatformDrawMode(mode), ib.indexCount, getPlatformType(ib.type), 0);
 }
 

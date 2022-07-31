@@ -6,17 +6,16 @@ FILE(GLOB INCLUDE
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/**.h"
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/**.cpp"
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/**.h"
-    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/**.cpp"
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/Graphics/**.h"
-    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/Graphics/**.cpp"
+    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/Window/**.h"
 )
 FILE(GLOB GLFW
-    "${CMAKE_SOURCE_DIR}/SandboxEngine/src/Platform/GLFW/**.h"
-    "${CMAKE_SOURCE_DIR}/SandboxEngine/src/Platform/GLFW/**.cpp"
+    "${CMAKE_SOURCE_DIR}/SandboxEngine/src/Window/GLFW/**.h"
+    "${CMAKE_SOURCE_DIR}/SandboxEngine/src/Window/GLFW/**.cpp"
 )
 FILE(GLOB OPENGL
-    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/src/Platform/OpenGL/**.h"
-    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/src/Platform/OpenGL/**.cpp"
+    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/src/Graphics/OpenGL/**.h"
+    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/src/Graphics/OpenGL/**.cpp"
 )
 FILE(GLOB IMGUI
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/dependencies/imgui/**.h"
@@ -72,7 +71,7 @@ target_precompile_headers(${ENGINE_NAME}
     PRIVATE
         [["Log.h"]]
         [["Window/Input.h"]]
-        [["Types.h"]]
+        [["Graphics/Types.h"]]
         
         # NOTE: 
         # Header file names specified with angle brackets (e.g. <unordered_map>) or explicit double quotes, e.g. [["other_header.h"]]) will be treated as is,  and include directories must be available for the compiler to find them. 
