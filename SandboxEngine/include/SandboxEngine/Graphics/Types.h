@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Log.h"
+#include "SandboxEngine/Log.h"
 
 namespace SE
 {

@@ -22,6 +22,7 @@ namespace SE
     class Shader;
     class Texture;
     class Mesh;
+    class Chunk;
 
     class Renderer
     {
@@ -31,7 +32,7 @@ namespace SE
         void viewport(int x, int y, int width, int height);
         void setPolygonMode(PolygonMode mode) const;
 
-        void draw(Mesh& mesh, Shader& shader, Texture& texture, DrawMode mode = DrawMode::TRIANGLES);
-        void draw(Mesh& mesh, IndexBuffer& ib, Shader& shader, Texture& texture, DrawMode mode = DrawMode::TRIANGLES);
+        void SE::Renderer::draw(Mesh& mesh, Shader& shader, Texture& texture, DrawMode mode = SE::DrawMode::TRIANGLES);
+        void SE::Renderer::draw(Mesh& mesh, IndexBuffer& ib, Shader& shader, Texture& texture, DrawMode mode = SE::DrawMode::TRIANGLES);
     };
 }
