@@ -20,63 +20,64 @@
 
 bool cameraMode(false);
 
-SE::Vertex* addCube(SE::Vertex* target, glm::vec3 pos, float size)
+SE::Vertex* getCube(glm::vec3 pos, float size)
 {
-    // Near:
-    target->vertPos = { pos.x - size / 2, pos.y - size / 2, pos.z + size / 2 }; target->texPos = { 0, 0 }; target++;
-    target->vertPos = { pos.x - size / 2, pos.y + size / 2, pos.z + size / 2 }; target->texPos = { 0, 1 }; target++;
-    target->vertPos = { pos.x + size / 2, pos.y + size / 2, pos.z + size / 2 }; target->texPos = { 1, 1 }; target++;
+    return new SE::Vertex[36]
+    {
+        //// VertPos            // TexPos                      // Index
+        // Near:
+        { { pos.x - size / 2, pos.y - size / 2, pos.z + size / 2 },    { 0, 0 } },     // Down left    0
+        { { pos.x - size / 2, pos.y + size / 2, pos.z + size / 2 },    { 0, 1 } },     // Top left     1
+        { { pos.x + size / 2, pos.y + size / 2, pos.z + size / 2 },    { 1, 1 } },     // Top right    2
 
-    target->vertPos = { pos.x + size / 2, pos.y + size / 2, pos.z + size / 2 }; target->texPos = { 1, 1 }; target++;
-    target->vertPos = { pos.x + size / 2, pos.y - size / 2, pos.z + size / 2 }; target->texPos = { 1, 0 }; target++;
-    target->vertPos = { pos.x - size / 2, pos.y - size / 2, pos.z + size / 2 }; target->texPos = { 0, 0 }; target++;
+        { { pos.x + size / 2, pos.y + size / 2, pos.z + size / 2 },    { 1, 1 } },     // Top right    2
+        { { pos.x + size / 2, pos.y - size / 2, pos.z + size / 2 },    { 1, 0 } },     // Down right   3
+        { { pos.x - size / 2, pos.y - size / 2, pos.z + size / 2 },    { 0, 0 } },     // Down left    0
 
-    // Far
-    target->vertPos = { pos.x - size / 2, pos.y - size / 2, pos.z - size / 2 }; target->texPos = { 0, 0 }; target++;
-    target->vertPos = { pos.x - size / 2, pos.y + size / 2, pos.z - size / 2 }; target->texPos = { 0, 1 }; target++;
-    target->vertPos = { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 }; target->texPos = { 1, 1 }; target++;
+        // Far
+        { { pos.x - size / 2, pos.y - size / 2, pos.z - size / 2 },    { 0, 0 } },     // Down left    4
+        { { pos.x - size / 2, pos.y + size / 2, pos.z - size / 2 },    { 0, 1 } },     // Top left     5
+        { { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    6
 
-    target->vertPos = { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 }; target->texPos = { 1, 1 }; target++;
-    target->vertPos = { pos.x + size / 2, pos.y - size / 2, pos.z - size / 2 }; target->texPos = { 1, 0 }; target++;
-    target->vertPos = { pos.x - size / 2, pos.y - size / 2, pos.z - size / 2 }; target->texPos = { 0, 0 }; target++;
+        { { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    6
+        { { pos.x + size / 2, pos.y - size / 2, pos.z - size / 2 },    { 1, 0 } },     // Down right   7
+        { { pos.x - size / 2, pos.y - size / 2, pos.z - size / 2 },    { 0, 0 } },     // Down left    4
 
-    // Left
-    target->vertPos = { pos.x - size / 2, pos.y - size / 2, pos.z - size / 2 }; target->texPos = { 0, 0 }; target++;
-    target->vertPos = { pos.x - size / 2, pos.y + size / 2, pos.z - size / 2 }; target->texPos = { 0, 1 }; target++;
-    target->vertPos = { pos.x - size / 2, pos.y + size / 2, pos.z + size / 2 }; target->texPos = { 1, 1 }; target++;
+        // Left
+        { { pos.x - size / 2, pos.y - size / 2, pos.z - size / 2 },    { 0, 0 } },     // Down left    8
+        { { pos.x - size / 2, pos.y + size / 2, pos.z - size / 2 },    { 0, 1 } },     // Top left     9
+        { { pos.x - size / 2, pos.y + size / 2, pos.z + size / 2 },    { 1, 1 } },     // Top right    10
 
-    target->vertPos = { pos.x - size / 2, pos.y + size / 2, pos.z + size / 2 }; target->texPos = { 1, 1 }; target++;
-    target->vertPos = { pos.x - size / 2, pos.y - size / 2, pos.z + size / 2 }; target->texPos = { 1, 0 }; target++;
-    target->vertPos = { pos.x - size / 2, pos.y - size / 2, pos.z - size / 2 }; target->texPos = { 0, 0 }; target++;
-    
-    // Right
-    target->vertPos = { pos.x + size / 2, pos.y - size / 2, pos.z + size / 2 }; target->texPos = { 0, 0 }; target++;
-    target->vertPos = { pos.x + size / 2, pos.y + size / 2, pos.z + size / 2 }; target->texPos = { 0, 1 }; target++;
-    target->vertPos = { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 }; target->texPos = { 1, 1 }; target++;
+        { { pos.x - size / 2, pos.y + size / 2, pos.z + size / 2 },    { 1, 1 } },     // Top right    10
+        { { pos.x - size / 2, pos.y - size / 2, pos.z + size / 2 },    { 1, 0 } },     // Down right   11
+        { { pos.x - size / 2, pos.y - size / 2, pos.z - size / 2 },    { 0, 0 } },     // Down left    8
+        
+        // Right
+        { { pos.x + size / 2, pos.y - size / 2, pos.z + size / 2 },    { 0, 0 } },     // Down left    12
+        { { pos.x + size / 2, pos.y + size / 2, pos.z + size / 2 },    { 0, 1 } },     // Top left     13
+        { { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    14
 
-    target->vertPos = { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 }; target->texPos = { 1, 1 }; target++;
-    target->vertPos = { pos.x + size / 2, pos.y - size / 2, pos.z - size / 2 }; target->texPos = { 1, 0 }; target++;
-    target->vertPos = { pos.x + size / 2, pos.y - size / 2, pos.z + size / 2 }; target->texPos = { 0, 0 }; target++;
+        { { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    14
+        { { pos.x + size / 2, pos.y - size / 2, pos.z - size / 2 },    { 1, 0 } },     // Down right   15
+        { { pos.x + size / 2, pos.y - size / 2, pos.z + size / 2 },    { 0, 0 } },     // Down left    12
+        // Top
+        { { pos.x - size / 2, pos.y + size / 2, pos.z + size / 2 },    { 0, 0 } },     // Down left    16
+        { { pos.x - size / 2, pos.y + size / 2, pos.z - size / 2 },    { 0, 1 } },     // Top left     17
+        { { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    18
+        
+        { { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    18
+        { { pos.x + size / 2, pos.y + size / 2, pos.z + size / 2 },    { 1, 0 } },     // Down right   19
+        { { pos.x - size / 2, pos.y + size / 2, pos.z + size / 2 },    { 0, 0 } },     // Down left    16
+        
+        // Bottom
+        { { pos.x - size / 2, pos.y - size / 2, pos.z + size / 2 },    { 0, 0 } },     // Down left    20
+        { { pos.x - size / 2, pos.y - size / 2, pos.z - size / 2 },    { 0, 1 } },     // Top left     21
+        { { pos.x + size / 2, pos.y - size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    22
 
-    // Top
-    target->vertPos = { pos.x - size / 2, pos.y + size / 2, pos.z + size / 2 }; target->texPos = { 0, 0 }; target++;
-    target->vertPos = { pos.x - size / 2, pos.y + size / 2, pos.z - size / 2 }; target->texPos = { 0, 1 }; target++;
-    target->vertPos = { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 }; target->texPos = { 1, 1 }; target++;
-
-    target->vertPos = { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 }; target->texPos = { 1, 1 }; target++;
-    target->vertPos = { pos.x + size / 2, pos.y + size / 2, pos.z + size / 2 }; target->texPos = { 1, 0 }; target++;
-    target->vertPos = { pos.x - size / 2, pos.y + size / 2, pos.z + size / 2 }; target->texPos = { 0, 0 }; target++;
-
-    // Bottom
-    target->vertPos = { pos.x - size / 2, pos.y - size / 2, pos.z + size / 2 }; target->texPos = { 0, 0 }; target++;
-    target->vertPos = { pos.x - size / 2, pos.y - size / 2, pos.z - size / 2 }; target->texPos = { 0, 1 }; target++;
-    target->vertPos = { pos.x + size / 2, pos.y - size / 2, pos.z - size / 2 }; target->texPos = { 1, 1 }; target++;
-
-    target->vertPos = { pos.x + size / 2, pos.y - size / 2, pos.z - size / 2 }; target->texPos = { 1, 1 }; target++;
-    target->vertPos = { pos.x + size / 2, pos.y - size / 2, pos.z + size / 2 }; target->texPos = { 1, 0 }; target++;
-    target->vertPos = { pos.x - size / 2, pos.y - size / 2, pos.z + size / 2 }; target->texPos = { 0, 0 }; target++;
-
-    return target;
+        { { pos.x + size / 2, pos.y - size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    22
+        { { pos.x + size / 2, pos.y - size / 2, pos.z + size / 2 },    { 1, 0 } },     // Down right   23
+        { { pos.x - size / 2, pos.y - size / 2, pos.z + size / 2 },    { 0, 0 } }      // Down left    20
+    };
 }
 
 glm::vec3 firstCubePos(1.0f, -5.0f, 0.0f);
@@ -242,14 +243,14 @@ public:
             glm::mat4 vp = projection * view;
             shader->setUniform(SE::MAT4F, "u_transformation", (void*)&vp);
 
-            std::array<SE::Vertex, 36 * cubeCount> vertices;
-            SE::Vertex* buffer = vertices.data();
-            buffer = addCube(buffer, firstCubePos, firstCubeSize);
-            buffer = addCube(buffer, secondCubePos, secondCubeSize);
+            std::unique_ptr<SE::Vertex> firstCubeVertices(getCube(firstCubePos, firstCubeSize));
+            std::unique_ptr<SE::Vertex> secondCubeVertices(getCube(secondCubePos, secondCubeSize));
 
             // Setting dynamic VB:
             mesh->vb.bind();
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(SE::Vertex) * vertices.size(), vertices.data());// TODO: Try to call this 2 times
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(SE::Vertex) * 36, firstCubeVertices.get());
+            glBufferSubData(GL_ARRAY_BUFFER, sizeof(SE::Vertex) * 36, sizeof(SE::Vertex) * 36, secondCubeVertices.get());
+
 
             //Rendering:
             renderer.draw(*mesh.get(), *shader.get(), *sod.get());
