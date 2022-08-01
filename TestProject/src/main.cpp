@@ -19,18 +19,33 @@
 #include <sstream>
 #include <memory>
 #include <array>
+#include <cmath>
 
 bool cameraMode(false);
 
-struct Chunk2 : public Chunk
+struct Chunk : public ChunkBase
 {
-    void setTypes() override
+    void processVoxel(Voxel& voxel, glm::vec3 centerPos) override
     {
-        for (int x{}; x < this->count; ++x)
-            for (int y{}; y < this->count; ++y)
-                for (int z{}; z < this->count; ++z)
-                    this->voxels[x][y][z].type = VoxelType::SAND;
+        // Setting type:
+        voxel.type = VoxelType::AIR;
+
+        if (centerPos.y <= (sin(centerPos.x * 0.6f) * 0.5f + 0.5f) * 10)
+        {
+            if (centerPos.y <= 7) voxel.type = VoxelType::GRASS;
+            if (centerPos.y <= 5) voxel.type = VoxelType::GROUND;
+            if (centerPos.y <= 2) voxel.type = VoxelType::SAND;
+        }
+        // Actions on type:
+        if (voxel.type == VoxelType::AIR) return; // Not rendering air
+        // NOTE: Specify index starting from bottom left corner.
+        if (voxel.type == VoxelType::GROUND) addCube(centerPos, cubeSize, glm::vec2(2, 15), glm::vec2(64.0f, 64.0f), glm::vec2(1024.0f, 1024.0f));
+        if (voxel.type == VoxelType::GRASS) addCube(centerPos, cubeSize, glm::vec2(3, 15), glm::vec2(64.0f, 64.0f), glm::vec2(1024.0f, 1024.0f));
+        if (voxel.type == VoxelType::SAND) addCube(centerPos, cubeSize, glm::vec2(4, 15), glm::vec2(64.0f, 64.0f), glm::vec2(1024.0f, 1024.0f));
+
     }
+
+    const float cubeSize{ 1.0f };
 };
 
 class App : public SE::Application
@@ -40,15 +55,15 @@ public:
     {
         cameraMode = events.isKey(SE::Key::C, SE::Action::TOGGLE);
 
-        if (cameraMode) camera.processKeyboard(events, deltaTime);
+        if (cameraMode) camera->processKeyboard(events, deltaTime);
     }
     void processMouseMovement(float xoffset, float yoffset) override
     {
-        if (cameraMode) camera.processMouseMovement(xoffset, yoffset);
+        if (cameraMode) camera->processMouseMovement(xoffset, yoffset);
     }
     void processScroll(float offset) override
     {
-        if (cameraMode) camera.processScroll(offset);
+        if (cameraMode) camera->processScroll(offset);
     }
 
     App()
@@ -96,7 +111,7 @@ public:
                 ImGui::Begin("Camera");
                 ImGui::Text("Press 'C' to toggle camera mode");
                 ImGui::Text("Scroll to adjust speed");
-                ImGui::Text("Speed: %i", (int)camera.speed);
+                ImGui::Text("Speed: %i", (int)camera->speed);
                 ImGui::End();
             }
             ImGui::Render();
@@ -104,24 +119,23 @@ public:
 
         // Transforming & Rendering:
         {
-            glm::mat4 view = camera.getViewMatrix();
-            glm::mat4 projection = glm::perspective(glm::radians(camera.FOV), (float)window.width / (float)window.height, 0.1f, 100.0f);
+            glm::mat4 view = camera->getViewMatrix();
+            glm::mat4 projection = glm::perspective(glm::radians(camera->FOV), (float)window.width / (float)window.height, 0.1f, 100.0f);
             glm::mat4 vp = projection * view;
-            shader.setUniform(SE::MAT4F, "u_transformation", (void*)&vp);
+            shader->setUniform(SE::MAT4F, "u_transformation", (void*)&vp);
 
             //Rendering:
-            shader.setUniform(SE::INT, "u_texture", (void*)&sand.slot);
-            renderer.draw(*chunk.getMesh(), chunk.ib, shader, sand);
+            shader->setUniform(SE::INT, "u_texture", (void*)&atlas->slot);
+            renderer.draw(*chunk.getMesh(), *chunk.ib.get(), *shader.get(), *atlas.get());
         }
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
     
-    SE::Camera camera{ glm::vec3(0, 0, 20) };
-    SE::Texture sod{ "D:/Development/SandboxEngine/TestProject/resources/textures/sod.jpg", true };
-    SE::Texture sand{ "D:/Development/SandboxEngine/TestProject/resources/textures/sand.png" };
-    SE::Shader shader{ "D:/Development/SandboxEngine/TestProject/src/shaders/basic.vert", "D:/Development/SandboxEngine/TestProject/src/shaders/basic.frag" };
-    Chunk2 chunk;
+    std::unique_ptr<SE::Camera> camera{ new SE::Camera(glm::vec3(0, 0, 20)) };
+    std::unique_ptr<SE::Texture> atlas{ new SE::Texture{ "D:/Development/SandboxEngine/TestProject/resources/textures/atlas.png", true } };
+    std::unique_ptr<SE::Shader> shader{ new SE::Shader{ "D:/Development/SandboxEngine/TestProject/src/shaders/basic.vert", "D:/Development/SandboxEngine/TestProject/src/shaders/basic.frag" } };
+    Chunk chunk;
 }; 
 
 int main()

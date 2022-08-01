@@ -11,34 +11,36 @@ enum VoxelType
 {
     AIR = 0,
     SAND,
-    SOD
+    GRASS,
+    GROUND
 };
 struct Voxel
 {
     VoxelType type;
 };
-struct Chunk
+struct ChunkBase
 {
-    virtual void setTypes() = 0;
+    virtual void processVoxel(Voxel& voxel, glm::vec3 centerPos) = 0;
 
     SE::Mesh* getMesh()
     {
-        setTypes();
         // Updating cubes:
-        unsigned int offset{ 0 };
-        unsigned int size = sizeof(SE::Vertex) * 24;
         for (int x{}; x < count; ++x)
             for (int y{}; y < count; ++y)
                 for (int z{}; z < count; ++z)
                 {
                     Voxel& voxel = voxels[x][y][z];
-                    if (voxel.type == VoxelType::AIR) continue; // Not rendering air
-                    // Updating meshes:
-                    std::unique_ptr<SE::Vertex> vertices(getCube(glm::vec3(x, y, z), 1.0f));
-                    this->mesh.vb.add(vertices.get(), size, offset);
-                    offset += size;
+                    processVoxel(voxel, { x, y, z });
                 }
+        this->offset = 0;
         return &this->mesh;
+    }
+
+    void addCube(glm::vec3 centerPos, float cubeSize, glm::vec2 texIndex, glm::vec2 texRes, glm::vec2 atlasRes)
+    {
+        std::unique_ptr<SE::Vertex> vertices(getCube(centerPos, cubeSize, texIndex, texRes, atlasRes));
+        this->mesh.vb.add(vertices.get(), sizeof(SE::Vertex) * 24, offset);
+        this->offset += sizeof(SE::Vertex) * 24;
     }
 
     static const unsigned int count = 16;
@@ -46,49 +48,57 @@ struct Chunk
     static const unsigned int indexCount = 36 * count * count * count;
 
     Voxel voxels[count][count][count];
-    SE::IndexBuffer ib{ *getIB() };
+    std::unique_ptr<SE::IndexBuffer> ib{ new SE::IndexBuffer { *getIB() } };
 
 private:
-    inline SE::Vertex* getCube(glm::vec3 pos, float size)
+    inline SE::Vertex* getCube(glm::vec3 centerPos, float cubeSize, glm::vec2 texIndex, glm::vec2 texRes, glm::vec2 atlasRes)
     {
+        glm::vec2 texPos[4]
+        {
+            {(texIndex.x * texRes.x) / atlasRes.x, (texIndex.y * texRes.y) / atlasRes.y},
+            {(texIndex.x * texRes.x) / atlasRes.x, ((texIndex.y + 1) * texRes.y) / atlasRes.y},
+            {((texIndex.x + 1) * texRes.x) / atlasRes.x, ((texIndex.y + 1) * texRes.y) / atlasRes.y},
+            {((texIndex.x + 1) * texRes.x) / atlasRes.x, (texIndex.y * texRes.y) / atlasRes.y}
+        };
+
         return new SE::Vertex[24]
         {
-                //// VertPos            // TexPos                      // Index
+                //// VertPos                                                                                 // TexPos                          // Index
                 // Near:
-                { { pos.x - size / 2, pos.y - size / 2, pos.z + size / 2 },    { 0, 0 } },     // Down left    0
-                { { pos.x - size / 2, pos.y + size / 2, pos.z + size / 2 },    { 0, 1 } },     // Top left     1
-                { { pos.x + size / 2, pos.y + size / 2, pos.z + size / 2 },    { 1, 1 } },     // Top right    2
-                { { pos.x + size / 2, pos.y - size / 2, pos.z + size / 2 },    { 1, 0 } },     // Down right   3
+                { { centerPos.x - cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[0] },     // Bottom left    0
+                { { centerPos.x - cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[1] },     // Top left       1
+                { { centerPos.x + cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[2] },     // Top right      2
+                { { centerPos.x + cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[3] },     // Bottom right   3
 
                 // Far
-                { { pos.x + size / 2, pos.y - size / 2, pos.z - size / 2 },    { 0, 0 } },     // Down left    4
-                { { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 },    { 0, 1 } },     // Top left     5
-                { { pos.x - size / 2, pos.y + size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    6
-                { { pos.x - size / 2, pos.y - size / 2, pos.z - size / 2 },    { 1, 0 } },     // Down right   7
+                { { centerPos.x + cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[0] },     // Bottom left    4
+                { { centerPos.x + cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[1] },     // Top left       5
+                { { centerPos.x - cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[2] },     // Top right      6
+                { { centerPos.x - cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[3] },     // Bottom right   7
 
                 // Left
-                { { pos.x - size / 2, pos.y - size / 2, pos.z - size / 2 },    { 0, 0 } },     // Down left    8
-                { { pos.x - size / 2, pos.y + size / 2, pos.z - size / 2 },    { 0, 1 } },     // Top left     9
-                { { pos.x - size / 2, pos.y + size / 2, pos.z + size / 2 },    { 1, 1 } },     // Top right    10
-                { { pos.x - size / 2, pos.y - size / 2, pos.z + size / 2 },    { 1, 0 } },     // Down right   11
+                { { centerPos.x - cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[0] },     // Bottom left    8
+                { { centerPos.x - cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[1] },     // Top left       9
+                { { centerPos.x - cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[2] },     // Top right      10
+                { { centerPos.x - cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[3] },     // Bottom right   11
 
                 // Right
-                { { pos.x + size / 2, pos.y - size / 2, pos.z + size / 2 },    { 0, 0 } },     // Down left    12
-                { { pos.x + size / 2, pos.y + size / 2, pos.z + size / 2 },    { 0, 1 } },     // Top left     13
-                { { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    14
-                { { pos.x + size / 2, pos.y - size / 2, pos.z - size / 2 },    { 1, 0 } },     // Down right   15
+                { { centerPos.x + cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[0] },     // Bottom left    12
+                { { centerPos.x + cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[1] },     // Top left       13
+                { { centerPos.x + cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[2] },     // Top right      14
+                { { centerPos.x + cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[3] },     // Bottom right   15
 
                 // Top
-                { { pos.x - size / 2, pos.y + size / 2, pos.z + size / 2 },    { 0, 0 } },     // Down left    16
-                { { pos.x - size / 2, pos.y + size / 2, pos.z - size / 2 },    { 0, 1 } },     // Top left     17
-                { { pos.x + size / 2, pos.y + size / 2, pos.z - size / 2 },    { 1, 1 } },     // Top right    18
-                { { pos.x + size / 2, pos.y + size / 2, pos.z + size / 2 },    { 1, 0 } },     // Down right   19
+                { { centerPos.x - cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[0] },     // Bottom left    16
+                { { centerPos.x - cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[1] },     // Top left       17
+                { { centerPos.x + cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[2] },     // Top right      18
+                { { centerPos.x + cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[3] },     // Bottom right   19
 
                 // Bottom
-                { { pos.x - size / 2, pos.y - size / 2, pos.z - size / 2 },    { 0, 0 } },     // Down left    20
-                { { pos.x - size / 2, pos.y - size / 2, pos.z + size / 2 },    { 0, 1 } },     // Top left     21
-                { { pos.x + size / 2, pos.y - size / 2, pos.z + size / 2 },    { 1, 1 } },     // Top right    22
-                { { pos.x + size / 2, pos.y - size / 2, pos.z - size / 2 },    { 1, 0 } },     // Down right   23
+                { { centerPos.x - cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[0] },     // Bottom left    20
+                { { centerPos.x - cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[1] },     // Top left       21
+                { { centerPos.x + cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[2] },     // Top right      22
+                { { centerPos.x + cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[3] },     // Bottom right   23
             };
     }
     SE::IndexBuffer* getIB()
@@ -158,4 +168,6 @@ private:
             return ib;
         }
     SE::Mesh mesh{nullptr, sizeof(SE::Vertex) * vertexCount, SE::DYNAMIC_DRAW};
+
+    unsigned int offset{ 0 };
 };
