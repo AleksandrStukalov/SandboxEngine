@@ -25,27 +25,30 @@ bool cameraMode(false);
 
 struct Chunk : public ChunkBase
 {
-    void processVoxel(Voxel& voxel, glm::vec3 centerPos) override
+    Chunk() { this->cubeSize = 1.0f; }
+    void setVoxelType(Voxel& voxel, glm::vec3 index) override
     {
         // Setting type:
         voxel.type = VoxelType::AIR;
-
-        if (centerPos.y <= (sin(centerPos.x * 0.6f) * 0.5f + 0.5f) * 10)
+        float x = index.x, y = index.y, z = index.z;
+        if (y <= (sin(x * 0.6f) * 0.5f + 0.5f) * 10)
         {
-            if (centerPos.y <= 7) voxel.type = VoxelType::GRASS;
-            if (centerPos.y <= 5) voxel.type = VoxelType::GROUND;
-            if (centerPos.y <= 2) voxel.type = VoxelType::SAND;
+            if (y <= 6) voxel.type = VoxelType::GRASS;
+            if (y <= 4) voxel.type = VoxelType::GROUND;
+            if (y <= 2) voxel.type = VoxelType::SAND;
         }
+    }
+
+    virtual void setActiosOnType(Voxel& voxel, glm::vec3 index) override
+    {
+        float x = index.x, y = index.y, z = index.z;
         // Actions on type:
         if (voxel.type == VoxelType::AIR) return; // Not rendering air
         // NOTE: Specify index starting from bottom left corner.
-        if (voxel.type == VoxelType::GROUND) addCube(centerPos, cubeSize, glm::vec2(2, 15), glm::vec2(64.0f, 64.0f), glm::vec2(1024.0f, 1024.0f));
-        if (voxel.type == VoxelType::GRASS) addCube(centerPos, cubeSize, glm::vec2(3, 15), glm::vec2(64.0f, 64.0f), glm::vec2(1024.0f, 1024.0f));
-        if (voxel.type == VoxelType::SAND) addCube(centerPos, cubeSize, glm::vec2(4, 15), glm::vec2(64.0f, 64.0f), glm::vec2(1024.0f, 1024.0f));
-
+        if (voxel.type == VoxelType::GROUND) addCube(index, cubeSize, { 2, 15 }, { 64, 64 }, { 1024, 1024 });
+        if (voxel.type == VoxelType::GRASS) addCube(index, cubeSize, { 3, 15 }, { 64, 64 }, { 1024, 1024 });
+        if (voxel.type == VoxelType::SAND) addCube(index, cubeSize, { 4, 15 }, { 64, 64 }, { 1024, 1024 });
     }
-
-    const float cubeSize{ 1.0f };
 };
 
 class App : public SE::Application
@@ -69,6 +72,10 @@ public:
     App()
         : Application("App", 1920, 1080)
     {
+        // Generating chunk:
+        chunk->generate();
+
+
         // Initializing ImGui:
         {
             // Setting up ImGui context:
@@ -126,16 +133,17 @@ public:
 
             //Rendering:
             shader->setUniform(SE::INT, "u_texture", (void*)&atlas->slot);
-            renderer.draw(*chunk.getMesh(), *chunk.ib.get(), *shader.get(), *atlas.get());
+            renderer.draw(*chunk->getMesh(), *chunk->ib.get(), *shader.get(), *atlas.get());
         }
+
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
     
-    std::unique_ptr<SE::Camera> camera{ new SE::Camera(glm::vec3(0, 0, 20)) };
+    std::unique_ptr<SE::Camera> camera{ new SE::Camera(glm::vec3(0, 20, 40)) };
     std::unique_ptr<SE::Texture> atlas{ new SE::Texture{ "D:/Development/SandboxEngine/TestProject/resources/textures/atlas.png", true } };
     std::unique_ptr<SE::Shader> shader{ new SE::Shader{ "D:/Development/SandboxEngine/TestProject/src/shaders/basic.vert", "D:/Development/SandboxEngine/TestProject/src/shaders/basic.frag" } };
-    Chunk chunk;
+    std::unique_ptr <Chunk> chunk{new Chunk() };
 }; 
 
 int main()

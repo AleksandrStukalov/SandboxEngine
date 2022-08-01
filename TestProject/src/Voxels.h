@@ -16,42 +16,80 @@ enum VoxelType
 };
 struct Voxel
 {
-    VoxelType type;
+    uint8_t type;
 };
 struct ChunkBase
 {
-    virtual void processVoxel(Voxel& voxel, glm::vec3 centerPos) = 0;
+    // For providing voxel type to every voxel depending on its index(position) in chunk
+    virtual void setVoxelType(Voxel& voxel, glm::vec3 index) = 0;
+    // Sets type for every voxel in chunk
+    void generate()
+    {
+        // Setting voxel types:
+        for (int x{}; x < voxelCount; ++x)
+            for (int z{ 0 }; z < voxelCount; ++z)
+                for (int y{ 0 }; y < voxelCount; ++y)
+                {
+                    Voxel& voxel = voxels[x][y][z];
+                    setVoxelType(voxel, { x, y, z });
+                }
+    }
+    // For providing actions, which will be executed for every voxel tyoe
+    virtual void setActiosOnType(Voxel& voxel, glm::vec3 index) = 0;
 
     SE::Mesh* getMesh()
     {
-        // Updating cubes:
-        for (int x{}; x < count; ++x)
-            for (int y{}; y < count; ++y)
-                for (int z{}; z < count; ++z)
-                {
-                    Voxel& voxel = voxels[x][y][z];
-                    processVoxel(voxel, { x, y, z });
-                }
-        this->offset = 0;
+        updateMesh();
         return &this->mesh;
     }
 
-    void addCube(glm::vec3 centerPos, float cubeSize, glm::vec2 texIndex, glm::vec2 texRes, glm::vec2 atlasRes)
+    // Adds cube faces to the vertex buffer if they are not blocked by some other block
+    void addCube(glm::vec3 centerPos, float edgeLength, glm::vec2 texIndex, glm::vec2 texRes, glm::vec2 atlasRes)
     {
-        std::unique_ptr<SE::Vertex> vertices(getCube(centerPos, cubeSize, texIndex, texRes, atlasRes));
-        this->mesh.vb.add(vertices.get(), sizeof(SE::Vertex) * 24, offset);
-        this->offset += sizeof(SE::Vertex) * 24;
+        int x = centerPos.x, y = centerPos.y, z = centerPos.z;
+        if (x == this->voxelCount - 1 || voxels[x + 1][y][z].type == VoxelType::AIR)
+        {
+            this->mesh.vb.add(getQuad({ x + edgeLength / 2, y, z }, edgeLength, { 1.0f, 0.0f, 0.0f }, texIndex, texRes, atlasRes), sizeof(SE::Vertex) * 4, offset);
+            this->offset += sizeof(SE::Vertex) * 4;
+        }
+        if (x == 0 || voxels[x - 1][y][z].type == VoxelType::AIR)
+        {
+            this->mesh.vb.add(getQuad({ x - edgeLength / 2, y, z }, edgeLength, { -1.0f, 0.0f, 0.0f }, texIndex, texRes, atlasRes), sizeof(SE::Vertex) * 4, offset);
+            this->offset += sizeof(SE::Vertex) * 4;
+        }
+        if (y == this->voxelCount - 1 || voxels[x][y + 1][z].type == VoxelType::AIR)
+        {
+            this->mesh.vb.add(getQuad({ x, y + edgeLength / 2, z }, edgeLength, { 0.0f, 1.0f, 0.0f }, texIndex, texRes, atlasRes), sizeof(SE::Vertex) * 4, offset);
+            this->offset += sizeof(SE::Vertex) * 4;
+        }
+        if (y == 0 || voxels[x][y - 1][z].type == VoxelType::AIR)
+        {
+            this->mesh.vb.add(getQuad({ x, y - edgeLength / 2, z }, edgeLength, { 0.0f, -1.0f, 0.0f }, texIndex, texRes, atlasRes), sizeof(SE::Vertex) * 4, offset);
+            this->offset += sizeof(SE::Vertex) * 4;
+        }
+        if (z == this->voxelCount - 1 || voxels[x][y][z + 1].type == VoxelType::AIR)
+        {
+            this->mesh.vb.add(getQuad({ x, y, z + edgeLength / 2 }, edgeLength, { 0.0f, 0.0f, 1.0f }, texIndex, texRes, atlasRes), sizeof(SE::Vertex) * 4, offset);
+            this->offset += sizeof(SE::Vertex) * 4;
+        }
+        if (z == 0 || voxels[x][y][z - 1].type == VoxelType::AIR)
+        {
+            this->mesh.vb.add(getQuad({ x, y, z - edgeLength / 2 }, edgeLength, { 0.0f, 0.0f, -1.0f }, texIndex, texRes, atlasRes), sizeof(SE::Vertex) * 4, offset);
+            this->offset += sizeof(SE::Vertex) * 4;
+        }
     }
 
-    static const unsigned int count = 16;
-    static const unsigned int vertexCount = 24 * count * count * count;
-    static const unsigned int indexCount = 36 * count * count * count;
+    float cubeSize{ 1.0f };
+    static const unsigned int voxelCount = 36;
+    static const unsigned int vertexCount = 24 * voxelCount * voxelCount * voxelCount;
+    static const unsigned int indexCount = 36 * voxelCount * voxelCount * voxelCount;
 
-    Voxel voxels[count][count][count];
+    Voxel voxels[voxelCount][voxelCount][voxelCount];
     std::unique_ptr<SE::IndexBuffer> ib{ new SE::IndexBuffer { *getIB() } };
 
 private:
-    inline SE::Vertex* getCube(glm::vec3 centerPos, float cubeSize, glm::vec2 texIndex, glm::vec2 texRes, glm::vec2 atlasRes)
+    // Returns textured rectangle vertides, which position is set according the normal(direction) vector of the rectangle. Texture is designed to be takem from atlas.
+    SE::Vertex* getQuad(glm::vec3 centerPos, float edgeLength, glm::vec3 normal, glm::vec2 texIndex, glm::vec2 texRes, glm::vec2 atlasRes)
     {
         glm::vec2 texPos[4]
         {
@@ -61,46 +99,75 @@ private:
             {((texIndex.x + 1) * texRes.x) / atlasRes.x, (texIndex.y * texRes.y) / atlasRes.y}
         };
 
-        return new SE::Vertex[24]
+        if (normal == glm::vec3(1.0f, 0.0f, 0.0f))// +X
         {
-                //// VertPos                                                                                 // TexPos                          // Index
-                // Near:
-                { { centerPos.x - cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[0] },     // Bottom left    0
-                { { centerPos.x - cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[1] },     // Top left       1
-                { { centerPos.x + cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[2] },     // Top right      2
-                { { centerPos.x + cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[3] },     // Bottom right   3
-
-                // Far
-                { { centerPos.x + cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[0] },     // Bottom left    4
-                { { centerPos.x + cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[1] },     // Top left       5
-                { { centerPos.x - cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[2] },     // Top right      6
-                { { centerPos.x - cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[3] },     // Bottom right   7
-
-                // Left
-                { { centerPos.x - cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[0] },     // Bottom left    8
-                { { centerPos.x - cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[1] },     // Top left       9
-                { { centerPos.x - cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[2] },     // Top right      10
-                { { centerPos.x - cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[3] },     // Bottom right   11
-
-                // Right
-                { { centerPos.x + cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[0] },     // Bottom left    12
-                { { centerPos.x + cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[1] },     // Top left       13
-                { { centerPos.x + cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[2] },     // Top right      14
-                { { centerPos.x + cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[3] },     // Bottom right   15
-
-                // Top
-                { { centerPos.x - cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[0] },     // Bottom left    16
-                { { centerPos.x - cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[1] },     // Top left       17
-                { { centerPos.x + cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[2] },     // Top right      18
-                { { centerPos.x + cubeSize / 2, centerPos.y + cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[3] },     // Bottom right   19
-
-                // Bottom
-                { { centerPos.x - cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[0] },     // Bottom left    20
-                { { centerPos.x - cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[1] },     // Top left       21
-                { { centerPos.x + cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z + cubeSize / 2 },    texPos[2] },     // Top right      22
-                { { centerPos.x + cubeSize / 2, centerPos.y - cubeSize / 2, centerPos.z - cubeSize / 2 },    texPos[3] },     // Bottom right   23
+            return new SE::Vertex[4]
+            {
+                { { centerPos.x, centerPos.y - edgeLength / 2, centerPos.z + edgeLength / 2 },    texPos[0] },
+                { { centerPos.x, centerPos.y + edgeLength / 2, centerPos.z + edgeLength / 2 },    texPos[1] },
+                { { centerPos.x, centerPos.y + edgeLength / 2, centerPos.z - edgeLength / 2 },    texPos[2] },
+                { { centerPos.x, centerPos.y - edgeLength / 2, centerPos.z - edgeLength / 2 },    texPos[3] },
             };
+        }
+        else if (normal == glm::vec3(-1.0f, 0.0f, 0.0f))// -X
+        {
+            return new SE::Vertex[4]
+            {
+                { { centerPos.x, centerPos.y - edgeLength / 2, centerPos.z - edgeLength / 2 },    texPos[0] },
+                { { centerPos.x, centerPos.y + edgeLength / 2, centerPos.z - edgeLength / 2 },    texPos[1] },
+                { { centerPos.x, centerPos.y + edgeLength / 2, centerPos.z + edgeLength / 2 },    texPos[2] },
+                { { centerPos.x, centerPos.y - edgeLength / 2, centerPos.z + edgeLength / 2 },    texPos[3] },
+            };
+        }
+        else if (normal == glm::vec3(0.0f, 1.0f, 0.0f))// +Y
+        {
+            return new SE::Vertex[4]
+            {
+                { { centerPos.x - edgeLength / 2, centerPos.y, centerPos.z + edgeLength / 2 },    texPos[0] },
+                { { centerPos.x - edgeLength / 2, centerPos.y, centerPos.z - edgeLength / 2 },    texPos[1] },
+                { { centerPos.x + edgeLength / 2, centerPos.y, centerPos.z - edgeLength / 2 },    texPos[2] },
+                { { centerPos.x + edgeLength / 2, centerPos.y, centerPos.z + edgeLength / 2 },    texPos[3] },
+            };
+        }
+        else if (normal == glm::vec3(0.0f, -1.0f, 0.0f))// -Y
+        {
+            return new SE::Vertex[4]
+            {
+                { { centerPos.x - edgeLength / 2, centerPos.y, centerPos.z - edgeLength / 2 },    texPos[0] },
+                { { centerPos.x - edgeLength / 2, centerPos.y, centerPos.z + edgeLength / 2 },    texPos[1] },
+                { { centerPos.x + edgeLength / 2, centerPos.y, centerPos.z + edgeLength / 2 },    texPos[2] },
+                { { centerPos.x + edgeLength / 2, centerPos.y, centerPos.z - edgeLength / 2 },    texPos[3] },
+            };
+        }
+        else if (normal == glm::vec3(0.0f, 0.0f, 1.0f))// +Z
+        {
+            return new SE::Vertex[4]
+            {
+                //// VertPos                                                                                 // TexPos
+                { { centerPos.x - edgeLength / 2, centerPos.y - edgeLength / 2, centerPos.z },    texPos[0] },
+                { { centerPos.x - edgeLength / 2, centerPos.y + edgeLength / 2, centerPos.z },    texPos[1] },
+                { { centerPos.x + edgeLength / 2, centerPos.y + edgeLength / 2, centerPos.z },    texPos[2] },
+                { { centerPos.x + edgeLength / 2, centerPos.y - edgeLength / 2, centerPos.z },    texPos[3] },
+            };
+        }
+        else if (normal == glm::vec3(0.0f, 0.0f, -1.0f))// -Z
+        {
+            return new SE::Vertex[4]
+            {
+                { { centerPos.x + edgeLength / 2, centerPos.y - edgeLength / 2, centerPos.z },    texPos[0] },
+                { { centerPos.x + edgeLength / 2, centerPos.y + edgeLength / 2, centerPos.z },    texPos[1] },
+                { { centerPos.x - edgeLength / 2, centerPos.y + edgeLength / 2, centerPos.z },    texPos[2] },
+                { { centerPos.x - edgeLength / 2, centerPos.y - edgeLength / 2, centerPos.z },    texPos[3] },
+            };
+        }
+        else
+        {
+            SE::Log::error({ "Invalid normal vector" });
+            return nullptr;
+        }
+       
     }
+    // Returns index buffer, which describes all the voxel vertices in chunk
     SE::IndexBuffer* getIB()
         {
             unsigned int* indices = new unsigned int[this->indexCount];
@@ -167,7 +234,19 @@ private:
             delete[] indices;
             return ib;
         }
-    SE::Mesh mesh{nullptr, sizeof(SE::Vertex) * vertexCount, SE::DYNAMIC_DRAW};
+    // Executes actions on each voxel type (generates or does not generate mesh for a specific type)
+    void updateMesh()
+    {
+        for (int x{}; x < voxelCount; ++x)
+            for (int z{ 0 }; z < voxelCount; ++z)
+                for (int y{ 0 }; y < voxelCount; ++y)
+                {
+                    Voxel& voxel = voxels[x][y][z];
+                    setActiosOnType(voxel, { x, y, z });
+                }
+        this->offset = 0;// Setting offset to zero, so next updateMesh() will rewrite currently present data
+    }
 
+    SE::Mesh mesh{nullptr, sizeof(SE::Vertex) * vertexCount, SE::DYNAMIC_DRAW};
     unsigned int offset{ 0 };
 };
