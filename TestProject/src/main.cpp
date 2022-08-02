@@ -25,29 +25,28 @@ bool cameraMode(false);
 
 struct Chunk : public ChunkBase
 {
-    Chunk() { this->cubeSize = 1.0f; }
-    void setVoxelType(Voxel& voxel, glm::vec3 index) override
+    void setVoxelMaterial(Voxel& voxel, glm::vec3 index) override
     {
         // Setting type:
-        voxel.type = VoxelType::AIR;
+        voxel.material = VoxelMaterial::AIR;
         float x = index.x, y = index.y, z = index.z;
         if (y <= (sin(x * 0.6f) * 0.5f + 0.5f) * 10)
         {
-            if (y <= 6) voxel.type = VoxelType::GRASS;
-            if (y <= 4) voxel.type = VoxelType::GROUND;
-            if (y <= 2) voxel.type = VoxelType::SAND;
+            if (y <= 6) voxel.material = VoxelMaterial::GRASS;
+            if (y <= 4) voxel.material = VoxelMaterial::GROUND;
+            if (y <= 2) voxel.material = VoxelMaterial::SAND;
         }
     }
 
-    virtual void setActiosOnType(Voxel& voxel, glm::vec3 index) override
+    virtual void setActiosOnMaterial(Voxel& voxel, glm::vec3 index) override
     {
         float x = index.x, y = index.y, z = index.z;
         // Actions on type:
-        if (voxel.type == VoxelType::AIR) return; // Not rendering air
+        if (voxel.material == VoxelMaterial::AIR) return; // Not rendering air
         // NOTE: Specify index starting from bottom left corner.
-        if (voxel.type == VoxelType::GROUND) addCube(index, cubeSize, { 2, 15 }, { 64, 64 }, { 1024, 1024 });
-        if (voxel.type == VoxelType::GRASS) addCube(index, cubeSize, { 3, 15 }, { 64, 64 }, { 1024, 1024 });
-        if (voxel.type == VoxelType::SAND) addCube(index, cubeSize, { 4, 15 }, { 64, 64 }, { 1024, 1024 });
+        if (voxel.material == VoxelMaterial::GROUND) addCube(index, index * cubeSize, {2, 15}, {64, 64}, {1024, 1024});
+        if (voxel.material == VoxelMaterial::GRASS) addCube(index, index * cubeSize, { 3, 15 }, { 64, 64 }, { 1024, 1024 });
+        if (voxel.material == VoxelMaterial::SAND) addCube(index, index * cubeSize, { 4, 15 }, { 64, 64 }, { 1024, 1024 });
     }
 };
 
@@ -72,6 +71,8 @@ public:
     App()
         : Application("App", 1920, 1080)
     {
+        camera->speed = 40.0f;
+
         // Generating chunk:
         chunk->generate();
 
@@ -115,10 +116,14 @@ public:
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
             {
-                ImGui::Begin("Camera");
-                ImGui::Text("Press 'C' to toggle camera mode");
-                ImGui::Text("Scroll to adjust speed");
-                ImGui::Text("Speed: %i", (int)camera->speed);
+                ImGui::Begin("##");
+                ImGui::Text("Camera:");
+                ImGui::Text("   Press 'C' to toggle camera mode");
+                ImGui::Text("   Scroll to adjust speed");
+                ImGui::Text("   Speed: %i", (int)camera->speed);
+                ImGui::Text("");
+                ImGui::Text("Chunk:");
+                ImGui::SliderFloat("Voxel size", &chunk->cubeSize, 0.5f, 5.0f);
                 ImGui::End();
             }
             ImGui::Render();
@@ -127,7 +132,7 @@ public:
         // Transforming & Rendering:
         {
             glm::mat4 view = camera->getViewMatrix();
-            glm::mat4 projection = glm::perspective(glm::radians(camera->FOV), (float)window.width / (float)window.height, 0.1f, 100.0f);
+            glm::mat4 projection = glm::perspective(glm::radians(camera->FOV), (float)window.width / (float)window.height, 0.1f, 1000.0f);
             glm::mat4 vp = projection * view;
             shader->setUniform(SE::MAT4F, "u_transformation", (void*)&vp);
 

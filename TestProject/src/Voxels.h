@@ -7,7 +7,7 @@
 #include <vector>
 
 
-enum VoxelType
+enum VoxelMaterial
 {
     AIR = 0,
     SAND,
@@ -16,26 +16,26 @@ enum VoxelType
 };
 struct Voxel
 {
-    uint8_t type;
+    uint8_t material;
 };
 struct ChunkBase
 {
-    // For providing voxel type to every voxel depending on its index(position) in chunk
-    virtual void setVoxelType(Voxel& voxel, glm::vec3 index) = 0;
-    // Sets type for every voxel in chunk
+    // For providing voxel material to every voxel depending on its index(position) in chunk
+    virtual void setVoxelMaterial(Voxel& voxel, glm::vec3 index) = 0;
+    // Sets material for every voxel in chunk
     void generate()
     {
-        // Setting voxel types:
+        // Setting voxel materials:
         for (int x{}; x < voxelCount; ++x)
             for (int z{ 0 }; z < voxelCount; ++z)
                 for (int y{ 0 }; y < voxelCount; ++y)
                 {
                     Voxel& voxel = voxels[x][y][z];
-                    setVoxelType(voxel, { x, y, z });
+                    setVoxelMaterial(voxel, { x, y, z });
                 }
     }
     // For providing actions, which will be executed for every voxel tyoe
-    virtual void setActiosOnType(Voxel& voxel, glm::vec3 index) = 0;
+    virtual void setActiosOnMaterial(Voxel& voxel, glm::vec3 index) = 0;
 
     SE::Mesh* getMesh()
     {
@@ -44,37 +44,40 @@ struct ChunkBase
     }
 
     // Adds cube faces to the vertex buffer if they are not blocked by some other block
-    void addCube(glm::vec3 centerPos, float edgeLength, glm::vec2 texIndex, glm::vec2 texRes, glm::vec2 atlasRes)
+    void addCube(glm::ivec3 index, glm::vec3 centerPos, glm::vec2 texIndex, glm::vec2 texRes, glm::vec2 atlasRes)
     {
-        int x = centerPos.x, y = centerPos.y, z = centerPos.z;
-        if (x == this->voxelCount - 1 || voxels[x + 1][y][z].type == VoxelType::AIR)
+        float edgeLength = cubeSize;
+
+        if (index.x == this->voxelCount - 1 || voxels[index.x + 1][index.y][index.z].material == VoxelMaterial::AIR)
         {
-            this->mesh.vb.add(getQuad({ x + edgeLength / 2, y, z }, edgeLength, { 1.0f, 0.0f, 0.0f }, texIndex, texRes, atlasRes), sizeof(SE::Vertex) * 4, offset);
+            this->mesh.vb.add(getQuad({ centerPos.x + edgeLength / 2, centerPos.y, centerPos.z }, { 1.0f, 0.0f, 0.0f }, texIndex, texRes, atlasRes), sizeof(SE::Vertex) * 4, offset);
             this->offset += sizeof(SE::Vertex) * 4;
         }
-        if (x == 0 || voxels[x - 1][y][z].type == VoxelType::AIR)
+        if (index.x == 0 || voxels[index.x - 1][index.y][index.z].material == VoxelMaterial::AIR)
         {
-            this->mesh.vb.add(getQuad({ x - edgeLength / 2, y, z }, edgeLength, { -1.0f, 0.0f, 0.0f }, texIndex, texRes, atlasRes), sizeof(SE::Vertex) * 4, offset);
+            this->mesh.vb.add(getQuad({ centerPos.x - edgeLength / 2, centerPos.y, centerPos.z }, { -1.0f, 0.0f, 0.0f }, texIndex, texRes, atlasRes), sizeof(SE::Vertex) * 4, offset);
             this->offset += sizeof(SE::Vertex) * 4;
         }
-        if (y == this->voxelCount - 1 || voxels[x][y + 1][z].type == VoxelType::AIR)
+
+        if (index.y == this->voxelCount - 1 || voxels[index.x][index.y + 1][index.z].material == VoxelMaterial::AIR)
         {
-            this->mesh.vb.add(getQuad({ x, y + edgeLength / 2, z }, edgeLength, { 0.0f, 1.0f, 0.0f }, texIndex, texRes, atlasRes), sizeof(SE::Vertex) * 4, offset);
+            this->mesh.vb.add(getQuad({ centerPos.x, centerPos.y + edgeLength / 2, centerPos.z }, { 0.0f, 1.0f, 0.0f }, texIndex, texRes, atlasRes), sizeof(SE::Vertex) * 4, offset);
             this->offset += sizeof(SE::Vertex) * 4;
         }
-        if (y == 0 || voxels[x][y - 1][z].type == VoxelType::AIR)
+        if (index.y == 0 || voxels[index.x][index.y - 1][index.z].material == VoxelMaterial::AIR)
         {
-            this->mesh.vb.add(getQuad({ x, y - edgeLength / 2, z }, edgeLength, { 0.0f, -1.0f, 0.0f }, texIndex, texRes, atlasRes), sizeof(SE::Vertex) * 4, offset);
+            this->mesh.vb.add(getQuad({ centerPos.x, centerPos.y - edgeLength / 2, centerPos.z }, { 0.0f, -1.0f, 0.0f }, texIndex, texRes, atlasRes), sizeof(SE::Vertex) * 4, offset);
             this->offset += sizeof(SE::Vertex) * 4;
         }
-        if (z == this->voxelCount - 1 || voxels[x][y][z + 1].type == VoxelType::AIR)
+
+        if (index.z == this->voxelCount - 1 || voxels[index.x][index.y][index.z + 1].material == VoxelMaterial::AIR)
         {
-            this->mesh.vb.add(getQuad({ x, y, z + edgeLength / 2 }, edgeLength, { 0.0f, 0.0f, 1.0f }, texIndex, texRes, atlasRes), sizeof(SE::Vertex) * 4, offset);
+            this->mesh.vb.add(getQuad({ centerPos.x, centerPos.y, centerPos.z + edgeLength / 2 }, { 0.0f, 0.0f, 1.0f }, texIndex, texRes, atlasRes), sizeof(SE::Vertex) * 4, offset);
             this->offset += sizeof(SE::Vertex) * 4;
         }
-        if (z == 0 || voxels[x][y][z - 1].type == VoxelType::AIR)
+        if (index.z == 0 || voxels[index.x][index.y][index.z - 1].material == VoxelMaterial::AIR)
         {
-            this->mesh.vb.add(getQuad({ x, y, z - edgeLength / 2 }, edgeLength, { 0.0f, 0.0f, -1.0f }, texIndex, texRes, atlasRes), sizeof(SE::Vertex) * 4, offset);
+            this->mesh.vb.add(getQuad({ centerPos.x, centerPos.y, centerPos.z - edgeLength / 2 }, { 0.0f, 0.0f, -1.0f }, texIndex, texRes, atlasRes), sizeof(SE::Vertex) * 4, offset);
             this->offset += sizeof(SE::Vertex) * 4;
         }
     }
@@ -89,8 +92,9 @@ struct ChunkBase
 
 private:
     // Returns textured rectangle vertides, which position is set according the normal(direction) vector of the rectangle. Texture is designed to be takem from atlas.
-    SE::Vertex* getQuad(glm::vec3 centerPos, float edgeLength, glm::vec3 normal, glm::vec2 texIndex, glm::vec2 texRes, glm::vec2 atlasRes)
+    SE::Vertex* getQuad(glm::vec3 centerPos, glm::vec3 normal, glm::vec2 texIndex, glm::vec2 texRes, glm::vec2 atlasRes)
     {
+        float edgeLength = cubeSize;
         glm::vec2 texPos[4]
         {
             {(texIndex.x * texRes.x) / atlasRes.x, (texIndex.y * texRes.y) / atlasRes.y},
@@ -234,7 +238,7 @@ private:
             delete[] indices;
             return ib;
         }
-    // Executes actions on each voxel type (generates or does not generate mesh for a specific type)
+    // Executes actions on each voxel material (generates or does not generate mesh for a specific material)
     void updateMesh()
     {
         for (int x{}; x < voxelCount; ++x)
@@ -242,7 +246,7 @@ private:
                 for (int y{ 0 }; y < voxelCount; ++y)
                 {
                     Voxel& voxel = voxels[x][y][z];
-                    setActiosOnType(voxel, { x, y, z });
+                    setActiosOnMaterial(voxel, { x, y, z });
                 }
         this->offset = 0;// Setting offset to zero, so next updateMesh() will rewrite currently present data
     }
