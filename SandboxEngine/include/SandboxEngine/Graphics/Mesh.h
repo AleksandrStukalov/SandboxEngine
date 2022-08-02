@@ -19,13 +19,13 @@ namespace SE
         glm::vec2 texPos;
 
         Vertex() {}
-        Vertex(glm::vec3 vertPos, glm::vec2 texPos)
+        Vertex(const glm::vec3 vertPos, const glm::vec2 texPos)
             : vertPos(vertPos), texPos(texPos) {}
     };
     class Mesh
     {
     public:
-        inline Mesh(Vertex* vertices, unsigned int size, BufferUsage usage)
+        inline Mesh(Vertex* vertices, const unsigned int size, BufferUsage usage)
             : vertexCount(size / sizeof(Vertex))
             , vertices(vertices)
             , vb(vertices, size, usage)

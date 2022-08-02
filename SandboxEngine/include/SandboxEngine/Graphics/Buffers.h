@@ -16,10 +16,10 @@ namespace SE
     class VertexBuffer
     {
     public:
-        VertexBuffer(void* data, unsigned int size, BufferUsage usage);
+        VertexBuffer(const void* data, const unsigned int size, BufferUsage usage);
         ~VertexBuffer();
-        void bind();
-        void add(void* data, unsigned int size, unsigned int offset);// NOTE: We can't calculate offset automatically, because it has to be set to zero every frame.
+        void bind() const;
+        void add(const void* data, const unsigned int size, const unsigned int offset);// NOTE: We can't calculate offset automatically, because it has to be set to zero every frame.
 
     private:
         unsigned int id;
@@ -29,9 +29,9 @@ namespace SE
     class IndexBuffer
     {
     public:
-        IndexBuffer(void* indices, SE::Type type, unsigned int size, BufferUsage usage);
+        IndexBuffer(const void* indices, SE::Type type, const unsigned int size, BufferUsage usage);
         ~IndexBuffer();
-        void bind();
+        void bind() const;
 
         SE::Type type;
         unsigned int indexCount;
@@ -42,7 +42,7 @@ namespace SE
     class VertexAttribute
     {
     public:
-        inline VertexAttribute(unsigned int count, Type type, bool normalized = false)
+        inline VertexAttribute(const unsigned int count, Type type, bool normalized = false)
             : count(count), type(type), normalized(normalized), offset(0) {}
         
         unsigned int count;
@@ -71,7 +71,7 @@ namespace SE
     public:
         VertexArray();
         ~VertexArray();
-        void bind();
+        void bind() const;
         void add(VertexBuffer& vb, VertexBufferLayout& layout);
 
     private:

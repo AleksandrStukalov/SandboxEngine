@@ -14,7 +14,7 @@ unsigned int SE::getPlatformBufferUsage(SE::BufferUsage usage)
 }
 
 // Vertex buffer:
-SE::VertexBuffer::VertexBuffer(void* data, unsigned int size, SE::BufferUsage usage)
+SE::VertexBuffer::VertexBuffer(const void* data, const unsigned int size, SE::BufferUsage usage)
     : usage(usage)
 {
     glGenBuffers(1, &id);
@@ -27,12 +27,12 @@ SE::VertexBuffer::~VertexBuffer()
     glDeleteBuffers(1, &id);
 }
 
-void SE::VertexBuffer::bind()
+void SE::VertexBuffer::bind() const
 {
     glBindBuffer(GL_ARRAY_BUFFER, id);
 }
 
-void SE::VertexBuffer::add(void* data, unsigned int size, unsigned int offset)
+void SE::VertexBuffer::add(const void* data, const unsigned int size, const unsigned int offset)
 {
     if (usage != SE::DYNAMIC_DRAW) SE::Log::error({ "Can't add data to static buffer" });
     bind();
@@ -40,7 +40,7 @@ void SE::VertexBuffer::add(void* data, unsigned int size, unsigned int offset)
 }
 
 // Index buffer:
-SE::IndexBuffer::IndexBuffer(void* indices, SE::Type type, unsigned int size, BufferUsage usage)
+SE::IndexBuffer::IndexBuffer(const void* indices, SE::Type type, const unsigned int size, BufferUsage usage)
     : type(type)
 {
     glGenBuffers(1, &id);
@@ -55,7 +55,7 @@ SE::IndexBuffer::~IndexBuffer()
     glDeleteBuffers(GL_ELEMENT_ARRAY_BUFFER, &id);
 }
 
-void SE::IndexBuffer::bind()
+void SE::IndexBuffer::bind() const
 {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
 }
@@ -71,7 +71,7 @@ SE::VertexArray::~VertexArray()
     glDeleteVertexArrays(1, &id);
 }
 
-void SE::VertexArray::bind()
+void SE::VertexArray::bind() const
 {
     glBindVertexArray(id);
 }

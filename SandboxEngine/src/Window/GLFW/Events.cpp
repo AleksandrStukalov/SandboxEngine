@@ -5,7 +5,7 @@
 
 float SE::getTime() { return (float)glfwGetTime(); }
 
-void SE::Events::poll() { glfwPollEvents(); }
+void SE::Events::poll() const { glfwPollEvents(); }
 
 // Callbacks:
 void errorCallback(int error_code, const char* description)

@@ -18,37 +18,50 @@
 #include <iostream>
 #include <sstream>
 #include <memory>
-#include <array>
 #include <cmath>
+#include <array>
+#include <vector>
 
 bool cameraMode(false);
 
-struct Chunk : public ChunkBase
+void setVoxelMaterials(Chunk& chunk)
 {
-    void setVoxelMaterial(Voxel& voxel, glm::vec3 index) override
-    {
-        // Setting type:
-        voxel.material = VoxelMaterial::AIR;
-        float x = index.x, y = index.y, z = index.z;
-        if (y <= (sin(x * 0.6f) * 0.5f + 0.5f) * 10)
-        {
-            if (y <= 6) voxel.material = VoxelMaterial::GRASS;
-            if (y <= 4) voxel.material = VoxelMaterial::GROUND;
-            if (y <= 2) voxel.material = VoxelMaterial::SAND;
-        }
-    }
+    for (int x{}; x < Chunk::voxelCount; ++x)
+        for (int y{}; y < Chunk::voxelCount; ++y)
+            for (int z{}; z < Chunk::voxelCount; ++z)
+            {
+                Voxel& voxel = chunk.voxels[x][y][z];
+                voxel.material = VoxelMaterial::AIR;
+                if (y <= (sin(x * 0.6f) * 0.5f + 0.5f) * 10)
+                {
+                    if (y <= 6) voxel.material = VoxelMaterial::GRASS;
+                    if (y <= 4) voxel.material = VoxelMaterial::GROUND;
+                    if (y <= 2) voxel.material = VoxelMaterial::SAND;
+                }
+            }
+}
 
-    virtual void setActiosOnMaterial(Voxel& voxel, glm::vec3 index) override
-    {
-        float x = index.x, y = index.y, z = index.z;
-        // Actions on type:
-        if (voxel.material == VoxelMaterial::AIR) return; // Not rendering air
-        // NOTE: Specify index starting from bottom left corner.
-        if (voxel.material == VoxelMaterial::GROUND) addCube(index, index * cubeSize, {2, 15}, {64, 64}, {1024, 1024});
-        if (voxel.material == VoxelMaterial::GRASS) addCube(index, index * cubeSize, { 3, 15 }, { 64, 64 }, { 1024, 1024 });
-        if (voxel.material == VoxelMaterial::SAND) addCube(index, index * cubeSize, { 4, 15 }, { 64, 64 }, { 1024, 1024 });
-    }
-};
+void setActiosOnMaterial(Chunk& chunk)
+{
+    for (int x{}; x < Chunk::voxelCount; ++x)
+        for (int y{}; y < Chunk::voxelCount; ++y)
+            for (int z{}; z < Chunk::voxelCount; ++z)
+            {
+                Voxel& voxel = chunk.voxels[x][y][z];
+                glm::vec3 index{ x, y, z };
+                // Actions on type:
+                if (voxel.material == VoxelMaterial::AIR) continue;
+
+                Chunk::VoxelData voxelData{ index, index * Voxel::size };
+                Chunk::TextureAtlasData texAtlasData{ { 64, 64 }, { 1024, 1024 } };
+                // NOTE: Specify index starting from bottom left corner.
+                if (voxel.material == VoxelMaterial::GROUND) chunk.addVoxelToMesh(voxelData,{ 2, 15 }, texAtlasData);
+                if (voxel.material == VoxelMaterial::GRASS)  chunk.addVoxelToMesh(voxelData,{ 3, 15 }, texAtlasData);
+                if (voxel.material == VoxelMaterial::SAND)   chunk.addVoxelToMesh(voxelData,{ 4, 15 }, texAtlasData);
+            }
+
+}
+
 
 class App : public SE::Application
 {
@@ -72,9 +85,6 @@ public:
         : Application("App", 1920, 1080)
     {
         camera->speed = 40.0f;
-
-        // Generating chunk:
-        chunk->generate();
 
 
         // Initializing ImGui:
@@ -122,8 +132,7 @@ public:
                 ImGui::Text("   Scroll to adjust speed");
                 ImGui::Text("   Speed: %i", (int)camera->speed);
                 ImGui::Text("");
-                ImGui::Text("Chunk:");
-                ImGui::SliderFloat("Voxel size", &chunk->cubeSize, 0.5f, 5.0f);
+                ImGui::SliderFloat("Voxel size", &Voxel::size, 0.5, 4.0);
                 ImGui::End();
             }
             ImGui::Render();
@@ -133,26 +142,38 @@ public:
         {
             glm::mat4 view = camera->getViewMatrix();
             glm::mat4 projection = glm::perspective(glm::radians(camera->FOV), (float)window.width / (float)window.height, 0.1f, 1000.0f);
-            glm::mat4 vp = projection * view;
-            shader->setUniform(SE::MAT4F, "u_transformation", (void*)&vp);
-
-            //Rendering:
+            
             shader->setUniform(SE::INT, "u_texture", (void*)&atlas->slot);
-            renderer.draw(*chunk->getMesh(), *chunk->ib.get(), *shader.get(), *atlas.get());
+
+            for (int x{}; x < ChunkManager::chunkCount; ++x)
+                for (int y{}; y < ChunkManager::chunkCount; ++y)
+                    for (int z{}; z < ChunkManager::chunkCount; ++z)
+                    {
+                        Chunk& chunk = chunkManager.chunks[x][y][z];
+                        glm::mat4 model = glm::translate(glm::mat4(1.0f), { glm::vec3(x, y, z) * (float)Chunk::voxelCount * Voxel::size });
+                        glm::mat4 mvp = projection * view * model;
+                        shader->setUniform(SE::MAT4F, "u_transformation", (void*)&mvp);
+
+                        renderer.draw(*chunk.getMesh(setActiosOnMaterial), chunkManager.chunkIB, *shader.get(), *atlas.get());
+                    }
+           
         }
 
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
     
-    std::unique_ptr<SE::Camera> camera{ new SE::Camera(glm::vec3(0, 20, 40)) };
+    std::unique_ptr<SE::Camera> camera{ new SE::Camera(glm::vec3(0, 0, 100)) };
     std::unique_ptr<SE::Texture> atlas{ new SE::Texture{ "D:/Development/SandboxEngine/TestProject/resources/textures/atlas.png", true } };
     std::unique_ptr<SE::Shader> shader{ new SE::Shader{ "D:/Development/SandboxEngine/TestProject/src/shaders/basic.vert", "D:/Development/SandboxEngine/TestProject/src/shaders/basic.frag" } };
-    std::unique_ptr <Chunk> chunk{new Chunk() };
+    ChunkManager chunkManager{ setVoxelMaterials };
 }; 
 
 int main()
 {
-    App().update();
+    App* app = new App;
+    app->update();
+
+    delete app;
 }
 

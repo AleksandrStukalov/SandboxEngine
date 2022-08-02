@@ -79,7 +79,7 @@ SE::Texture::~Texture()
     glDeleteTextures(1, &id);
 }
 
-void SE::Texture::bind()
+void SE::Texture::bind() const
 {
     glActiveTexture(textureUnit);
     glBindTexture(GL_TEXTURE_2D, id);// Calling bind to currently active texture unit.

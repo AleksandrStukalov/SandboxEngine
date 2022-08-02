@@ -9,9 +9,9 @@ namespace SE
     public:
         Shader(const char* vertexShaderPath, const char* fragmentShaderPath);
         ~Shader();
-        void bind();
+        void bind() const;
 
-        void setUniform(SE::Type type, std::string name, void* data);
+        void setUniform(SE::Type type, const std::string name, const void* data);
 
         unsigned int program;
     private:

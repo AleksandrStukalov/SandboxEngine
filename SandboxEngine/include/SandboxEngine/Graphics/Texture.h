@@ -8,7 +8,7 @@ namespace SE
         Texture(const char* imagePath, bool flipVertically = false);
         ~Texture();
 
-        void bind();
+        void bind() const;
 
         int slot;// NOTE: Necessarly int! NOT unsigned int!
     private:

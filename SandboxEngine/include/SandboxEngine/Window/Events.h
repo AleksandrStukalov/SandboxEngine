@@ -10,7 +10,7 @@ namespace SE
     public:
         Events(SE::Application& application);
 
-        void poll();
+        void poll() const;
 
         bool isKey(SE::Key, SE::Action action);
         bool isMouseButton(SE::MouseButton mouseButton, SE::Action action);

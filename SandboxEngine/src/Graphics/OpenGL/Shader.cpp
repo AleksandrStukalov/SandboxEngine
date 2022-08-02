@@ -4,7 +4,7 @@
 
 #include <fstream>
 
-void SE::Shader::setUniform(SE::Type type, std::string name, void* data)
+void SE::Shader::setUniform(SE::Type type, const std::string name,  const void* data)
 {
     int location = glGetUniformLocation(this->program, name.c_str());
     if (location == -1) SE::Log::warning({ "Uniform", name, " doesn't exist" });
@@ -25,7 +25,7 @@ void SE::Shader::setUniform(SE::Type type, std::string name, void* data)
     // This feature allows us to save some API calls by loading all the instances in one call.
 }
 
-void SE::Shader::bind() { glUseProgram(program); }
+void SE::Shader::bind() const { glUseProgram(program); }
 
 SE::Shader::Shader(const char* vertexShaderPath, const char* fragmentShaderPath)
 {
