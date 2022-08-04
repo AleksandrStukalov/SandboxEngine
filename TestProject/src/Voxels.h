@@ -20,57 +20,140 @@ struct Voxel
     uint8_t material;
 };
 float Voxel::size{ 1.0f };
-
 struct Chunk
 {
-    SE::Mesh* getMesh(void(*actionsOnMaterial)(Chunk&))
+    struct ChunkData
+    { 
+        glm::ivec3 index;
+        unsigned int chunkCount;
+        Chunk*** chunks;
+    };
+    SE::Mesh* getMesh(void(*actionsOnMaterial)(Chunk&, ChunkData), ChunkData chunkData)
     {
         this->vertexOffset = 0;// Setting offset to zero, so next updateMesh() will rewrite currently present data
 
-        actionsOnMaterial(*this);
+        actionsOnMaterial(*this, chunkData);
 
         return &this->mesh;
     }
 
     struct VoxelData{ glm::ivec3 index; glm::vec3 centerPos; };
     struct TextureAtlasData{ glm::ivec2 texRes; glm::ivec2 atlasRes; };
-    void addVoxelToMesh(VoxelData voxelData, glm::vec2 texIndex, TextureAtlasData texAtlasData)
+    void addVoxelToMesh(ChunkData chunkData, VoxelData voxelData, glm::vec2 texIndex, TextureAtlasData texAtlasData)
     {
-        glm::ivec3& index = voxelData.index;
-        glm::vec3& centerPos = voxelData.centerPos;
         float edgeLength = Voxel::size;
 
-        if (index.x < this->voxelCount - 1 && voxels[index.x + 1][index.y][index.z].material == VoxelMaterial::AIR)
+        // Algorithm:
+        // We are rendering every voxel(cube) face-by-face(or side-by-side)
+        // If current voxel is chunk's inner voxel, then we check if the side is not blocked by some other voxel(which material is other than air).
+        if (voxelData.index.x < this->voxelCount - 1 && voxels[voxelData.index.x + 1][voxelData.index.y][voxelData.index.z].material == VoxelMaterial::AIR)
         {
-            this->mesh.vb.add(getRectangle({ centerPos.x + edgeLength / 2, centerPos.y, centerPos.z }, { 1.0f, 0.0f, 0.0f }, texIndex, texAtlasData), sizeof(SE::Vertex) * 4, vertexOffset);
+            this->mesh.vb.add(getRectangle({ voxelData.centerPos.x + edgeLength / 2, voxelData.centerPos.y, voxelData.centerPos.z }, { 1.0f, 0.0f, 0.0f }, texIndex, texAtlasData), sizeof(SE::Vertex) * 4, vertexOffset);
             this->vertexOffset += sizeof(SE::Vertex) * 4;
         }
-        if (index.x > 0 && voxels[index.x - 1][index.y][index.z].material == VoxelMaterial::AIR)
+        if (voxelData.index.x > 0 && voxels[voxelData.index.x - 1][voxelData.index.y][voxelData.index.z].material == VoxelMaterial::AIR)
         {
-            this->mesh.vb.add(getRectangle({ centerPos.x - edgeLength / 2, centerPos.y, centerPos.z }, { -1.0f, 0.0f, 0.0f }, texIndex, texAtlasData), sizeof(SE::Vertex) * 4, vertexOffset);
-            this->vertexOffset += sizeof(SE::Vertex) * 4;
-        }
-
-        if (index.y < this->voxelCount - 1 && voxels[index.x][index.y + 1][index.z].material == VoxelMaterial::AIR)
-        {
-            this->mesh.vb.add(getRectangle({ centerPos.x, centerPos.y + edgeLength / 2, centerPos.z }, { 0.0f, 1.0f, 0.0f }, texIndex, texAtlasData), sizeof(SE::Vertex) * 4, vertexOffset);
-            this->vertexOffset += sizeof(SE::Vertex) * 4;
-        }
-        if (index.y > 0 && voxels[index.x][index.y - 1][index.z].material == VoxelMaterial::AIR)
-        {
-            this->mesh.vb.add(getRectangle({ centerPos.x, centerPos.y - edgeLength / 2, centerPos.z }, { 0.0f, -1.0f, 0.0f }, texIndex, texAtlasData), sizeof(SE::Vertex) * 4, vertexOffset);
+            this->mesh.vb.add(getRectangle({ voxelData.centerPos.x - edgeLength / 2, voxelData.centerPos.y, voxelData.centerPos.z }, { -1.0f, 0.0f, 0.0f }, texIndex, texAtlasData), sizeof(SE::Vertex) * 4, vertexOffset);
             this->vertexOffset += sizeof(SE::Vertex) * 4;
         }
 
-        if (index.z < this->voxelCount - 1 && voxels[index.x][index.y][index.z + 1].material == VoxelMaterial::AIR)
+        if (voxelData.index.y < this->voxelCount - 1 && voxels[voxelData.index.x][voxelData.index.y + 1][voxelData.index.z].material == VoxelMaterial::AIR)
         {
-            this->mesh.vb.add(getRectangle({ centerPos.x, centerPos.y, centerPos.z + edgeLength / 2 }, { 0.0f, 0.0f, 1.0f }, texIndex, texAtlasData), sizeof(SE::Vertex) * 4, vertexOffset);
+            this->mesh.vb.add(getRectangle({ voxelData.centerPos.x, voxelData.centerPos.y + edgeLength / 2, voxelData.centerPos.z }, { 0.0f, 1.0f, 0.0f }, texIndex, texAtlasData), sizeof(SE::Vertex) * 4, vertexOffset);
             this->vertexOffset += sizeof(SE::Vertex) * 4;
         }
-        if (index.z > 0 && voxels[index.x][index.y][index.z - 1].material == VoxelMaterial::AIR)
+        if (voxelData.index.y > 0 && voxels[voxelData.index.x][voxelData.index.y - 1][voxelData.index.z].material == VoxelMaterial::AIR)
         {
-            this->mesh.vb.add(getRectangle({ centerPos.x, centerPos.y, centerPos.z - edgeLength / 2 }, { 0.0f, 0.0f, -1.0f }, texIndex, texAtlasData), sizeof(SE::Vertex) * 4, vertexOffset);
+            this->mesh.vb.add(getRectangle({ voxelData.centerPos.x, voxelData.centerPos.y - edgeLength / 2, voxelData.centerPos.z }, { 0.0f, -1.0f, 0.0f }, texIndex, texAtlasData), sizeof(SE::Vertex) * 4, vertexOffset);
             this->vertexOffset += sizeof(SE::Vertex) * 4;
+        }
+        
+        if (voxelData.index.z < this->voxelCount - 1 && voxels[voxelData.index.x][voxelData.index.y][voxelData.index.z + 1].material == VoxelMaterial::AIR)
+        {
+            this->mesh.vb.add(getRectangle({ voxelData.centerPos.x, voxelData.centerPos.y, voxelData.centerPos.z + edgeLength / 2 }, { 0.0f, 0.0f, 1.0f }, texIndex, texAtlasData), sizeof(SE::Vertex) * 4, vertexOffset);
+            this->vertexOffset += sizeof(SE::Vertex) * 4;
+        }
+        if (voxelData.index.z > 0 && voxels[voxelData.index.x][voxelData.index.y][voxelData.index.z - 1].material == VoxelMaterial::AIR)
+        {
+            this->mesh.vb.add(getRectangle({ voxelData.centerPos.x, voxelData.centerPos.y, voxelData.centerPos.z - edgeLength / 2 }, { 0.0f, 0.0f, -1.0f }, texIndex, texAtlasData), sizeof(SE::Vertex) * 4, vertexOffset);
+            this->vertexOffset += sizeof(SE::Vertex) * 4;
+        }
+        // If current voxel is a border voxel, then we check if there are any neighbors for current chunk in the direction, where voxel's side is facing.
+        // If there are no neighbors, we render face; If there are neighbors, we check if the material of the voxel right on the front of current one is air, and if it is, we render a face.
+        
+        if ((voxelData.index.x == this->voxelCount - 1) || (voxelData.index.x == 0) ||
+            (voxelData.index.y == this->voxelCount - 1) || (voxelData.index.y == 0) ||
+            (voxelData.index.z == this->voxelCount - 1) || (voxelData.index.z == 0))   // If current voxel is a border voxel
+        {
+            // Getting chunk neighbors:
+            Chunk* posXNeighbor{ nullptr };
+            Chunk* negXNeighbor{ nullptr };
+            Chunk* posYNeighbor{ nullptr };
+            Chunk* negYNeighbor{ nullptr };
+            Chunk* posZNeighbor{ nullptr };
+            Chunk* negZNeighbor{ nullptr };
+
+            if (chunkData.index.x < chunkData.chunkCount - 1)// +X Inner chunk
+                posXNeighbor = &chunkData.chunks[chunkData.index.x + 1][chunkData.index.y][chunkData.index.z];//Getting a +X neighbor:
+            if (chunkData.index.x > 0)// -X Inner chunk
+                negXNeighbor = &chunkData.chunks[chunkData.index.x - 1][chunkData.index.y][chunkData.index.z];//Getting a -X neighbor:
+            if (chunkData.index.y < chunkData.chunkCount - 1)// +Y Inner chunk
+                posYNeighbor = &chunkData.chunks[chunkData.index.x][chunkData.index.y + 1][chunkData.index.z];//Getting a +Y neighbor:
+            if (chunkData.index.y > 0)// -Y Inner chunk
+                negYNeighbor = &chunkData.chunks[chunkData.index.x][chunkData.index.y - 1][chunkData.index.z];//Getting a -Y neighbor:
+            if (chunkData.index.z < chunkData.chunkCount - 1)// +Z Inner chunk
+                posZNeighbor = &chunkData.chunks[chunkData.index.x][chunkData.index.y][chunkData.index.z + 1];//Getting a +Z neighbor:
+            if (chunkData.index.z > 0)// -Z Inner chunk
+                negZNeighbor = &chunkData.chunks[chunkData.index.x][chunkData.index.y][chunkData.index.z - 1];//Getting a -Z neighbor:
+
+            if (voxelData.index.x == this->voxelCount - 1)// +X Border voxel
+            {
+                if (posXNeighbor == nullptr || posXNeighbor->voxels[0][voxelData.index.y][voxelData.index.z].material == VoxelMaterial::AIR)// If there is no neigbor in this direction or there is a neighbor, and material of the nearest voxel in this direction(to current voxel) is air 
+                {
+                    this->mesh.vb.add(getRectangle({ voxelData.centerPos.x + edgeLength / 2, voxelData.centerPos.y, voxelData.centerPos.z }, { 1.0f, 0.0f, 0.0f }, texIndex, texAtlasData), sizeof(SE::Vertex) * 4, vertexOffset);
+                    this->vertexOffset += sizeof(SE::Vertex) * 4;
+                }
+            }
+            if (voxelData.index.x == 0)// -X Border voxel
+            {
+                if (negXNeighbor == nullptr || negXNeighbor->voxels[Chunk::voxelCount - 1][voxelData.index.y][voxelData.index.z].material == VoxelMaterial::AIR)
+                {
+                    this->mesh.vb.add(getRectangle({ voxelData.centerPos.x - edgeLength / 2, voxelData.centerPos.y, voxelData.centerPos.z }, { -1.0f, 0.0f, 0.0f }, texIndex, texAtlasData), sizeof(SE::Vertex) * 4, vertexOffset);
+                    this->vertexOffset += sizeof(SE::Vertex) * 4;
+                }
+            }
+            if (voxelData.index.y == this->voxelCount - 1)// +Y Border voxel
+            {
+                if (posYNeighbor == nullptr || posYNeighbor->voxels[voxelData.index.x][0][voxelData.index.z].material == VoxelMaterial::AIR)
+                {
+                    this->mesh.vb.add(getRectangle({ voxelData.centerPos.x, voxelData.centerPos.y + edgeLength / 2, voxelData.centerPos.z }, { 0.0f, 1.0f, 0.0f }, texIndex, texAtlasData), sizeof(SE::Vertex) * 4, vertexOffset);
+                    this->vertexOffset += sizeof(SE::Vertex) * 4;
+                }
+            }
+            if (voxelData.index.y == 0)// -Y Border voxel
+            {
+                if (negYNeighbor == nullptr || negYNeighbor->voxels[voxelData.index.x][Chunk::voxelCount - 1][voxelData.index.z].material == VoxelMaterial::AIR)
+                {
+                    this->mesh.vb.add(getRectangle({ voxelData.centerPos.x, voxelData.centerPos.y - edgeLength / 2, voxelData.centerPos.z }, { 0.0f, -1.0f, 0.0f }, texIndex, texAtlasData), sizeof(SE::Vertex) * 4, vertexOffset);
+                    this->vertexOffset += sizeof(SE::Vertex) * 4;
+                }
+            }
+            if (voxelData.index.z == this->voxelCount - 1)// +Z Border voxel
+            {
+                if (posZNeighbor == nullptr || posZNeighbor->voxels[voxelData.index.x][voxelData.index.y][0].material == VoxelMaterial::AIR)
+                {
+                    this->mesh.vb.add(getRectangle({ voxelData.centerPos.x, voxelData.centerPos.y, voxelData.centerPos.z + edgeLength / 2 }, { 0.0f, 0.0f, 1.0f }, texIndex, texAtlasData), sizeof(SE::Vertex) * 4, vertexOffset);
+                    this->vertexOffset += sizeof(SE::Vertex) * 4;
+                }
+            }
+            if (voxelData.index.z == 0)// -Z Border voxel
+            {
+                if (negZNeighbor == nullptr || negZNeighbor->voxels[voxelData.index.x][voxelData.index.y][Chunk::voxelCount - 1].material == VoxelMaterial::AIR)
+                {
+                    this->mesh.vb.add(getRectangle({ voxelData.centerPos.x, voxelData.centerPos.y, voxelData.centerPos.z - edgeLength / 2 }, { 0.0f, 0.0f, -1.0f }, texIndex, texAtlasData), sizeof(SE::Vertex) * 4, vertexOffset);
+                    this->vertexOffset += sizeof(SE::Vertex) * 4;
+                }
+            }
         }
     }
 
@@ -173,6 +256,18 @@ class ChunkManager
 public:
     ChunkManager(void(*setVoxelMaterials)(Chunk& chunk))
     {
+        chunks = new Chunk**[chunkCount];
+
+        // Allocating chunks:
+        for (int x{}; x < chunkCount; ++x)
+        {
+            chunks[x] = new Chunk* [chunkCount];
+            for (int y{}; y < chunkCount; ++y)
+            {
+                chunks[x][y] = new Chunk[chunkCount];
+            }
+        }
+
         for (int x{}; x < chunkCount; ++x)
             for (int y{}; y < chunkCount; ++y)
                 for (int z{}; z < chunkCount; ++z)
@@ -181,11 +276,22 @@ public:
                     setVoxelMaterials(chunk);
                 }
     }
+    ~ChunkManager()
+    {
+        //Deallocating chunks:
+        for (int x{}; x < chunkCount; ++x)
+        {
+            for (int y{}; y < chunkCount; ++y)
+                delete[] chunks[x][y];
+            delete[] chunks[x];
+        }
+        delete[] chunks;
+    }
 
     SE::IndexBuffer chunkIB{ getChunkIB() };
 
-    static const unsigned int chunkCount{ 4 };
-    Chunk chunks[chunkCount][chunkCount][chunkCount];
+    static const unsigned int chunkCount{ 3 };
+    Chunk*** chunks;
 
 
 private:

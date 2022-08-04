@@ -22,7 +22,6 @@
 #include <array>
 #include <vector>
 
-bool cameraMode(false);
 
 void setVoxelMaterials(Chunk& chunk)
 {
@@ -41,7 +40,7 @@ void setVoxelMaterials(Chunk& chunk)
             }
 }
 
-void setActiosOnMaterial(Chunk& chunk)
+void setActiosOnMaterial(Chunk& chunk, Chunk::ChunkData chunkData)
 {
     for (int x{}; x < Chunk::voxelCount; ++x)
         for (int y{}; y < Chunk::voxelCount; ++y)
@@ -55,13 +54,14 @@ void setActiosOnMaterial(Chunk& chunk)
                 Chunk::VoxelData voxelData{ index, index * Voxel::size };
                 Chunk::TextureAtlasData texAtlasData{ { 64, 64 }, { 1024, 1024 } };
                 // NOTE: Specify index starting from bottom left corner.
-                if (voxel.material == VoxelMaterial::GROUND) chunk.addVoxelToMesh(voxelData,{ 2, 15 }, texAtlasData);
-                if (voxel.material == VoxelMaterial::GRASS)  chunk.addVoxelToMesh(voxelData,{ 3, 15 }, texAtlasData);
-                if (voxel.material == VoxelMaterial::SAND)   chunk.addVoxelToMesh(voxelData,{ 4, 15 }, texAtlasData);
+                if (voxel.material == VoxelMaterial::GROUND) chunk.addVoxelToMesh(chunkData, voxelData, { 2, 15 }, texAtlasData);
+                if (voxel.material == VoxelMaterial::GRASS)  chunk.addVoxelToMesh(chunkData, voxelData, { 3, 15 }, texAtlasData);
+                if (voxel.material == VoxelMaterial::SAND)   chunk.addVoxelToMesh(chunkData, voxelData, { 4, 15 }, texAtlasData);
             }
 
 }
 
+bool cameraMode(false);
 
 class App : public SE::Application
 {
@@ -153,8 +153,9 @@ public:
                         glm::mat4 model = glm::translate(glm::mat4(1.0f), { glm::vec3(x, y, z) * (float)Chunk::voxelCount * Voxel::size });
                         glm::mat4 mvp = projection * view * model;
                         shader->setUniform(SE::MAT4F, "u_transformation", (void*)&mvp);
-
-                        renderer.draw(*chunk.getMesh(setActiosOnMaterial), chunkManager.chunkIB, *shader.get(), *atlas.get());
+                        Chunk::ChunkData chunkData{ glm::ivec3(x, y, z), chunkManager.chunkCount, chunkManager.chunks };
+                        renderer.draw(*chunk.getMesh(setActiosOnMaterial, chunkData), chunkManager.chunkIB, *shader.get(), *atlas.get());
+                        auto c = chunkManager.chunks;
                     }
            
         }
