@@ -16,7 +16,30 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-class Octree : public SE::Application
+//struct Octree
+//{
+//    Octree(const unsigned int depth)
+//    {
+//        Subdivide(Node(), depth);
+//    }
+//
+//    struct Node
+//    {
+//        SE::BoundingBox bb;
+//
+//        Node* childNodes[8];
+//    };
+//
+//    void Subdivide(Node& node, const unsigned int depth)
+//    {
+//        node.childNodes[]
+//
+//        for (auto childNode : node.childNodes)
+//            Subdivide(*childNode, depth - 1);
+//    }
+//};
+
+class OctreeApp : public SE::Application
 {
 public:
     void processKeyboard() override
@@ -34,8 +57,8 @@ public:
         if (cameraMode) camera->processScroll(offset);
     }
 
-    Octree()
-        : Application("Octree", 1920, 1080)
+    OctreeApp()
+        : Application("OctreeApp", 1920, 1080)
     {
         camera->speed = 10.0f;
 
@@ -54,7 +77,7 @@ public:
         }
     }
 
-    ~Octree()
+    ~OctreeApp()
     {
         // Finalizing ImGui:
         {
@@ -84,6 +107,8 @@ public:
                 ImGui::Text("   Press 'C' to toggle camera mode");
                 ImGui::Text("   Scroll to adjust speed");
                 ImGui::Text("   Speed: %i", (int)camera->speed);
+                ImGui::Text("Bounding box:");
+                ImGui::SliderFloat("Scale", &BBScale, 0, 100);
                 ImGui::End();
             }
             ImGui::Render();
@@ -94,14 +119,14 @@ public:
             // Translation:
             glm::mat4 view = camera->getViewMatrix();
             glm::mat4 projection = glm::perspective(glm::radians(camera->FOV), (float)window.width / (float)window.height, 0.1f, 1000.0f);
-            glm::mat4 model(1.0f);
+            glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(BBScale));
             glm::mat4 mvp = projection * view * model;
             shader->setUniform(SE::MAT4F, "u_transformation", (void*)&mvp);
-    
+
             // Rendering:
             glm::vec3 color(0.0f, 1.0f, 0.0f);
             shader->setUniform(SE::FLOAT_VEC3, "u_color", (void*)&color);
-            renderer.draw(bb.mesh, bb.ib, *shader.get(), *atlas.get(), SE::DrawMode::LINES);
+            renderer.draw(*bb.mesh.get(), bb.ib, *shader.get(), *atlas.get(), SE::DrawMode::LINES);
         }
 
 
@@ -112,5 +137,6 @@ public:
     std::unique_ptr<SE::Texture> atlas{ new SE::Texture{ "D:/Development/SandboxEngine/TestProject/resources/textures/atlas.png", true } };
     std::unique_ptr<SE::Shader> shader{ new SE::Shader{ "D:/Development/SandboxEngine/SandboxEngine/src/Graphics/shaders/primitive.vert", "D:/Development/SandboxEngine/SandboxEngine/src/Graphics/shaders/primitive.frag" } };
     bool cameraMode{ false };
-    SE::BoundingBox bb;
+    SE::BoundingBox bb{ 5.0f };
+    float BBScale{ 1.0f };
 };

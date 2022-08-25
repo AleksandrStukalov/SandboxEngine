@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Octree.h"
+#include "OctreeApp.h"
 #include "Minecraft.h"
 
 
 
 int main()
 {
-    Octree* app = new Octree();
+    OctreeApp* app = new OctreeApp();
     app->update();
 
     delete app;
