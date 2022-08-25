@@ -28,8 +28,8 @@ namespace SE
             if (events.isKey(SE::Key::S, SE::Action::PRESSED)) position -= cameraSpeed * front;
             if (events.isKey(SE::Key::A, SE::Action::PRESSED)) position -= glm::normalize(glm::cross(front, up)) * cameraSpeed;
             if (events.isKey(SE::Key::D, SE::Action::PRESSED)) position += glm::normalize(glm::cross(front, up)) * cameraSpeed;
-            if (events.isKey(SE::Key::SPACE, SE::Action::PRESSED)) position += up * cameraSpeed;
-            if (events.isKey(SE::Key::LEFT_CONTROL, SE::Action::PRESSED)) position -= up * cameraSpeed;
+            if (events.isKey(SE::Key::E, SE::Action::PRESSED)) position += up * cameraSpeed;
+            if (events.isKey(SE::Key::Q, SE::Action::PRESSED)) position -= up * cameraSpeed;
         }
 
         inline void processMouseMovement(float xoffset, float yoffset)

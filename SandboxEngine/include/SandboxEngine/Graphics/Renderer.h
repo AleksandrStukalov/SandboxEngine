@@ -4,7 +4,7 @@
 
 namespace SE
 {
-    enum DrawMode
+    enum class DrawMode
     {
         TRIANGLES,
         LINES,

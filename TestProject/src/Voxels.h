@@ -158,7 +158,7 @@ struct Chunk
     }
 
 
-    static const unsigned int voxelCount{ 16 };
+    static const unsigned int voxelCount{ 32 };
     Voxel voxels[voxelCount][voxelCount][voxelCount];
     static const unsigned int vertexCount = 24 * voxelCount * voxelCount * voxelCount;
     static const unsigned int indexCount = 36 * voxelCount * voxelCount * voxelCount;
@@ -290,14 +290,14 @@ public:
 
     SE::IndexBuffer chunkIB{ getChunkIB() };
 
-    static const unsigned int chunkCount{ 3 };
+    static const unsigned int chunkCount{ 1 };
     Chunk*** chunks;
 
 
 private:
     SE::IndexBuffer getChunkIB()
     {
-        unsigned int indices[Chunk::indexCount];
+        unsigned int* indices = new unsigned int[Chunk::indexCount];// Memory leak:)
         unsigned int offset{ 0 };
         for (unsigned int i{}; i < Chunk::indexCount; i += 36)
         {
