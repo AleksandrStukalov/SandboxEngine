@@ -6,7 +6,7 @@ namespace SE
 {
     struct Cube
     {
-        SE::Vertex vertices[24] {
+        SE::Vertex vertices[24]{
             // Near
             {{-0.5, -0.5, 0.5}, {0, 0}}, // Near Bottom Left
             {{-0.5, 0.5, 0.5},  {0, 1}}, // Near Top Left

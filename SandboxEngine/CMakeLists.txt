@@ -7,6 +7,7 @@ FILE(GLOB INCLUDE
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/**.cpp"
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/**.h"
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/Graphics/**.h"
+    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/Graphics/Primitives/**.h"
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/include/${ENGINE_NAME}/Window/**.h"
 )
 FILE(GLOB GLFW
@@ -26,6 +27,8 @@ FILE(GLOB SRC
     ${OPENGL}
     ${IMGUI}
     "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/**.txt"
+    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/src/Graphics/shaders/**.vert"
+    "${CMAKE_SOURCE_DIR}/${ENGINE_NAME}/src/Graphics/shaders/**.frag"
 )
 add_library(${ENGINE_NAME} 
     STATIC

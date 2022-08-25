@@ -3,8 +3,10 @@
 #include "Voxels.h"
 
 #include "SandboxEngine.h"
+
 #include "SandboxEngine/Graphics/Primitives/Plane.h"
 #include "SandboxEngine/Graphics/Primitives/Cube.h"
+#include "SandboxEngine/Graphics/Primitives/BoundingBox.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -60,6 +62,7 @@ public:
             ImGui_ImplGlfw_Shutdown();
             ImGui::DestroyContext();
         }
+
     }
 
     void onUpdate() override
@@ -96,8 +99,9 @@ public:
             shader->setUniform(SE::MAT4F, "u_transformation", (void*)&mvp);
     
             // Rendering:
-            shader->setUniform(SE::INT, "u_texture", (void*)&atlas->slot);
-            renderer.draw(cube->mesh, cube->ib, *shader.get(), *atlas.get(), SE::DrawMode::TRIANGLES);
+            glm::vec3 color(0.0f, 1.0f, 0.0f);
+            shader->setUniform(SE::FLOAT_VEC3, "u_color", (void*)&color);
+            renderer.draw(bb.mesh, bb.ib, *shader.get(), *atlas.get(), SE::DrawMode::LINES);
         }
 
 
@@ -106,8 +110,7 @@ public:
 
     std::unique_ptr<SE::Camera> camera{ new SE::Camera(glm::vec3(0, 0, 10)) };
     std::unique_ptr<SE::Texture> atlas{ new SE::Texture{ "D:/Development/SandboxEngine/TestProject/resources/textures/atlas.png", true } };
-    std::unique_ptr<SE::Shader> shader{ new SE::Shader{ "D:/Development/SandboxEngine/TestProject/src/shaders/basic.vert", "D:/Development/SandboxEngine/TestProject/src/shaders/basic.frag" } };
+    std::unique_ptr<SE::Shader> shader{ new SE::Shader{ "D:/Development/SandboxEngine/SandboxEngine/src/Graphics/shaders/primitive.vert", "D:/Development/SandboxEngine/SandboxEngine/src/Graphics/shaders/primitive.frag" } };
     bool cameraMode{ false };
-    std::unique_ptr<SE::Plane> plane{ new SE::Plane() };
-    std::unique_ptr<SE::Cube> cube{ new SE::Cube() };
+    SE::BoundingBox bb;
 };
