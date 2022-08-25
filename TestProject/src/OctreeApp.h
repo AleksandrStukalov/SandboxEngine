@@ -16,6 +16,17 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+enum OctreeIndices : unsigned int
+{
+    BottomLeftFront = 0,
+    TopLeftFront = 1,
+    TopRightFront = 2,
+    BottomRightFront = 3,
+    BottomLeftBack = 4,
+    TopLeftBack = 5,
+    TopRightBack = 6,
+    BottomRightBack = 7
+};
 //struct Octree
 //{
 //    Octree(const unsigned int depth)
@@ -25,17 +36,18 @@
 //
 //    struct Node
 //    {
-//        SE::BoundingBox bb;
 //
+//        SE::BoundingBox bb;
 //        Node* childNodes[8];
 //    };
 //
 //    void Subdivide(Node& node, const unsigned int depth)
 //    {
-//        node.childNodes[]
-//
-//        for (auto childNode : node.childNodes)
-//            Subdivide(*childNode, depth - 1);
+//        node.childNodes[BottomLeftFront]
+//        
+//        if (depth > 0)
+//            for (auto childNode : node.childNodes)
+//                Subdivide(*childNode, depth - 1);
 //    }
 //};
 
@@ -133,10 +145,10 @@ public:
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
-    std::unique_ptr<SE::Camera> camera{ new SE::Camera(glm::vec3(0, 0, 10)) };
+    std::unique_ptr<SE::Camera> camera{ new SE::Camera(glm::vec3(0, 0, 0)) };
     std::unique_ptr<SE::Texture> atlas{ new SE::Texture{ "D:/Development/SandboxEngine/TestProject/resources/textures/atlas.png", true } };
     std::unique_ptr<SE::Shader> shader{ new SE::Shader{ "D:/Development/SandboxEngine/SandboxEngine/src/Graphics/shaders/primitive.vert", "D:/Development/SandboxEngine/SandboxEngine/src/Graphics/shaders/primitive.frag" } };
     bool cameraMode{ false };
-    SE::BoundingBox bb{ 5.0f };
+    SE::BoundingBox bb{ 5.0f, {-5.0f, -3.0f, -17.0f}};
     float BBScale{ 1.0f };
 };
