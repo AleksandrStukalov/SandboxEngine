@@ -16,6 +16,10 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+#include <memory>
+#include <vector>
+#include <array>
+
 enum OctreeIndices : unsigned int
 {
     BottomLeftFront = 0,
@@ -27,29 +31,106 @@ enum OctreeIndices : unsigned int
     TopRightBack = 6,
     BottomRightBack = 7
 };
-//struct Octree
-//{
-//    Octree(const unsigned int depth)
-//    {
-//        Subdivide(Node(), depth);
-//    }
-//
-//    struct Node
-//    {
-//
-//        SE::BoundingBox bb;
-//        Node* childNodes[8];
-//    };
-//
-//    void Subdivide(Node& node, const unsigned int depth)
-//    {
-//        node.childNodes[BottomLeftFront]
-//        
-//        if (depth > 0)
-//            for (auto childNode : node.childNodes)
-//                Subdivide(*childNode, depth - 1);
-//    }
-//};
+struct Octree
+{
+    Octree(const float scale, const glm::vec3 position)
+        : root{ scale, position } {}
+
+    struct Node
+    {
+        Node(const float scale = 1.0f, const glm::vec3 position = { 0.0f, 0.0f, 0.0f })
+            : scale(scale), position(position) {}
+        bool isLeaf()
+        {
+            return (
+                childNodes[BottomLeftFront] == nullptr &&
+                childNodes[TopLeftFront] == nullptr &&
+                childNodes[TopRightFront] == nullptr &&
+                childNodes[BottomRightFront] == nullptr &&
+                childNodes[BottomLeftBack] == nullptr &&
+                childNodes[TopLeftBack] == nullptr &&
+                childNodes[TopRightBack] == nullptr &&
+                childNodes[BottomRightBack] == nullptr
+                );
+        }
+
+        float scale;
+        glm::vec3 position;
+        Node* childNodes[8]{
+            nullptr,
+            nullptr,
+            nullptr,
+            nullptr,
+            nullptr,
+            nullptr,
+            nullptr,
+            nullptr,
+        };
+    };
+
+
+    void Subdivide(Node* node, const unsigned int depth)
+    {
+        for (int i{}; i < 8; ++i)
+        {
+            delete node->childNodes[i];
+            node->childNodes[i] = nullptr;
+        }
+
+        if (depth > 0)
+        {
+            // Initializing given node's childNodes:
+            node->childNodes[BottomLeftFront] = new Node(node->scale / 2, {
+                    node->position.x - node->scale / 4,
+                    node->position.y - node->scale / 4,
+                    node->position.z + node->scale / 4,
+                });
+            node->childNodes[TopLeftFront] = new Node(node->scale / 2, {
+                    node->position.x - node->scale / 4,
+                    node->position.y + node->scale / 4,
+                    node->position.z + node->scale / 4,
+                });
+            node->childNodes[TopRightFront] = new Node(node->scale / 2, {
+                    node->position.x + node->scale / 4,
+                    node->position.y + node->scale / 4,
+                    node->position.z + node->scale / 4,
+                });
+            node->childNodes[BottomRightFront] = new Node(node->scale / 2, {
+                    node->position.x + node->scale / 4,
+                    node->position.y - node->scale / 4,
+                    node->position.z + node->scale / 4,
+                });
+            node->childNodes[BottomLeftBack] = new Node(node->scale / 2, {
+                    node->position.x - node->scale / 4,
+                    node->position.y - node->scale / 4,
+                    node->position.z - node->scale / 4,
+                });
+            node->childNodes[TopLeftBack] = new Node(node->scale / 2, {
+                    node->position.x - node->scale / 4,
+                    node->position.y + node->scale / 4,
+                    node->position.z - node->scale / 4,
+                });
+            node->childNodes[TopRightBack] = new Node(node->scale / 2, {
+                    node->position.x + node->scale / 4,
+                    node->position.y + node->scale / 4,
+                    node->position.z - node->scale / 4,
+                });
+            node->childNodes[BottomRightBack] = new Node(node->scale / 2, {
+                    node->position.x + node->scale / 4,
+                    node->position.y - node->scale / 4,
+                    node->position.z - node->scale / 4,
+                });
+
+            for (int i{}; i < 8; ++i)
+            {
+                Subdivide(node->childNodes[i], depth - 1);
+            }
+        }
+
+    }
+
+    Node root;
+};
 
 class OctreeApp : public SE::Application
 {
@@ -73,6 +154,8 @@ public:
         : Application("OctreeApp", 1920, 1080)
     {
         camera->speed = 10.0f;
+
+        octree.Subdivide(&octree.root, depth);
 
         // Initializing ImGui:
         {
@@ -119,8 +202,10 @@ public:
                 ImGui::Text("   Press 'C' to toggle camera mode");
                 ImGui::Text("   Scroll to adjust speed");
                 ImGui::Text("   Speed: %i", (int)camera->speed);
-                ImGui::Text("Bounding box:");
-                ImGui::SliderFloat("Scale", &BBScale, 0, 100);
+                ImGui::Text("Octree:");
+                ImGui::SliderFloat("Scale", &octreeScale, 0, 10);
+                ImGui::SliderFloat3("Position", &octreePosition.x, -10, 10);
+                ImGui::SliderInt("Subdivision count", &depth, 0, 4);
                 ImGui::End();
             }
             ImGui::Render();
@@ -128,27 +213,55 @@ public:
 
         // Transforming & Rendering:
         {
-            // Translation:
-            glm::mat4 view = camera->getViewMatrix();
-            glm::mat4 projection = glm::perspective(glm::radians(camera->FOV), (float)window.width / (float)window.height, 0.1f, 1000.0f);
-            glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(BBScale));
-            glm::mat4 mvp = projection * view * model;
-            shader->setUniform(SE::MAT4F, "u_transformation", (void*)&mvp);
+            // Transformation:
+            {
+                glm::mat4 view = camera->getViewMatrix();
+                glm::mat4 projection = glm::perspective(glm::radians(camera->FOV), (float)window.width / (float)window.height, 0.1f, 1000.0f);
+                glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(octreeScale));
+                glm::mat4 translation = glm::translate(glm::mat4(1.0f), octreePosition);
+                glm::mat4 model = translation * scale;
+                glm::mat4 mvp = projection * view * model;
+                shader->setUniform(SE::MAT4F, "u_transformation", (void*)&mvp);
+
+            }
+
+            if (prevDepth != depth) octree.Subdivide(&octree.root, depth);
 
             // Rendering:
-            glm::vec3 color(0.0f, 1.0f, 0.0f);
-            shader->setUniform(SE::FLOAT_VEC3, "u_color", (void*)&color);
-            renderer.draw(*bb.mesh.get(), bb.ib, *shader.get(), *atlas.get(), SE::DrawMode::LINES);
+            drawNode(octree.root);
+
         }
 
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
     }
 
-    std::unique_ptr<SE::Camera> camera{ new SE::Camera(glm::vec3(0, 0, 0)) };
+    void drawNode(Octree::Node& node)
+    {
+        glm::vec3 color;
+        node.isLeaf() ? color = { 0.0f, 1.0f, 0.0f } : color = { 0.6f, 0.4f, 0.4f };
+
+        shader->setUniform(SE::FLOAT_VEC3, "u_color", (void*)&color);
+        SE::BoundingBox bb{ node.scale, node.position };
+        renderer.draw(*bb.mesh.get(), *shader.get(), *atlas.get(), SE::DrawMode::LINES);
+
+        if (!node.isLeaf())
+        {
+            for (int i{}; i < 8; ++i)
+            {
+                drawNode(*node.childNodes[i]);
+            }
+        }
+    }
+
+    std::unique_ptr<SE::Camera> camera{ new SE::Camera(glm::vec3(0, 0, 5)) };
     std::unique_ptr<SE::Texture> atlas{ new SE::Texture{ "D:/Development/SandboxEngine/TestProject/resources/textures/atlas.png", true } };
     std::unique_ptr<SE::Shader> shader{ new SE::Shader{ "D:/Development/SandboxEngine/SandboxEngine/src/Graphics/shaders/primitive.vert", "D:/Development/SandboxEngine/SandboxEngine/src/Graphics/shaders/primitive.frag" } };
     bool cameraMode{ false };
-    SE::BoundingBox bb{ 5.0f, {-5.0f, -3.0f, -17.0f}};
-    float BBScale{ 1.0f };
+    float octreeScale{ 1.0f };
+    glm::vec3 octreePosition{ 0.0f, 0.0f, 0.0f };
+    int depth{ 2 };
+    int prevDepth{ depth };
+    Octree octree{ octreeScale, octreePosition };
 };
