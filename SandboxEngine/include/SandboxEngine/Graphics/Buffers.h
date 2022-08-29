@@ -72,9 +72,8 @@ namespace SE
         VertexArray();
         ~VertexArray();
         void bind() const;
-        void add(VertexBuffer& vb, VertexBufferLayout& layout, const unsigned int vertexCount);
+        void add(VertexBuffer& vb, VertexBufferLayout& layout);
 
-        unsigned int vertexCount{ 0 };
     private:
         unsigned int id;
     };

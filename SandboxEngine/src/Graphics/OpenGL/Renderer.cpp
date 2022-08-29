@@ -42,12 +42,13 @@ void SE::Renderer::setPolygonMode(PolygonMode mode) const
     }
 }
 
-void SE::Renderer::draw(const SE::VertexArray& va, const Shader& shader, const Texture& texture, DrawMode mode)
+void SE::Renderer::draw(const SE::VertexArray& va, const unsigned int vertexCount, const Shader& shader, const Texture& texture, DrawMode mode)
 {
     va.bind();
     shader.bind();
     texture.bind();
-    glDrawArrays(getPlatformDrawMode(mode), 0, va.vertexCount);
+    glDrawArrays(getPlatformDrawMode(mode), 0, vertexCount);
+    ++callCount;
 }
 
 void SE::Renderer::draw(const SE::VertexArray& va, const IndexBuffer& ib, const Shader& shader, const Texture& texture, DrawMode mode)
@@ -57,5 +58,6 @@ void SE::Renderer::draw(const SE::VertexArray& va, const IndexBuffer& ib, const 
     ib.bind();
     texture.bind();
     glDrawElements(getPlatformDrawMode(mode), ib.indexCount, getPlatformType(ib.type), 0);
+    ++callCount;
 }
 

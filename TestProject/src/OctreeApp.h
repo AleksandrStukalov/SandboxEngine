@@ -195,6 +195,7 @@ public:
             ImGui::NewFrame();
             {
                 ImGui::Begin("##");
+                ImGui::Text("Render calls per frame: %i", renderer.callCount);
                 ImGui::Text("Camera:");
                 ImGui::Text("   Press 'C' to toggle camera mode");
                 ImGui::Text("   Scroll to adjust speed");
@@ -202,82 +203,214 @@ public:
                 ImGui::Text("Octree:");
                 ImGui::SliderFloat("Scale", &octreeScale, 0, 10);
                 ImGui::SliderFloat3("Position", &octreePosition.x, -10, 10);
-                ImGui::SliderInt("Subdivision count", &depth, 0, 4);
+                ImGui::SliderInt("Subdivision count", &depth, 0, 7);
                 ImGui::End();
             }
             ImGui::Render();
         }
 
         // Transforming & Rendering:
+        
+        // Transformation:
         {
-            // Transformation:
-            {
-                glm::mat4 view = camera->getViewMatrix();
-                glm::mat4 projection = glm::perspective(glm::radians(camera->FOV), (float)window.width / (float)window.height, 0.1f, 1000.0f);
-                glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(octreeScale));
-                glm::mat4 translation = glm::translate(glm::mat4(1.0f), octreePosition);
-                glm::mat4 model = translation * scale;
-                glm::mat4 mvp = projection * view * model;
-                shader->setUniform(SE::MAT4F, "u_transformation", (void*)&mvp);
-
-            }
-
-            if (prevDepth != depth) octree.Subdivide(&octree.root, depth);
-
-            // Rendering:
-            
-            //std::unique_ptr<SE::Mesh> octreeMesh{ getOctreeMesh(octree.root) };
-            //renderer.draw(*octreeMesh.get(), *shader.get(), *atlas.get(), SE::DrawMode::LINES);
-            //drawNode(octree.root);
-
-
-            //float vertices[8 * 6]{
-            //    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f,// -X -Y
-            //    -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, // -X +Y
-
-            //    -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, // -X +Y
-            //    0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, // +X +Y
-
-            //    0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, // +X +Y
-            //    0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f,// +X -Y
-
-            //    0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f,// +X -Y
-            //    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f,// -X -Y
-            //};
-            //vb.reset(new SE::VertexBuffer(vertices, sizeof(vertices), SE::BufferUsage::STATIC_DRAW));
-            //SE::VertexAttribute positionAttribute(3, SE::FLOAT);
-            //SE::VertexAttribute colorAttribute(3, SE::FLOAT);
-            //SE::VertexBufferLayout layout;
-            //layout.add(positionAttribute);
-            //layout.add(colorAttribute);
-            //va->add(*vb.get(), layout, 8);
-            //renderer.draw(*va.get(), *shader.get(), *atlas.get(), SE::DrawMode::LINES);
-
-            drawNode(octree.root);
+            glm::mat4 view = camera->getViewMatrix();
+            glm::mat4 projection = glm::perspective(glm::radians(camera->FOV), (float)window.width / (float)window.height, 0.1f, 1000.0f);
+            glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(octreeScale));
+            glm::mat4 translation = glm::translate(glm::mat4(1.0f), octreePosition);
+            glm::mat4 model = translation * scale;
+            glm::mat4 mvp = projection * view * model;
+            shader->setUniform(SE::MAT4F, "u_transformation", (void*)&mvp);
 
         }
 
+        if (prevDepth != depth)
+        {
+            octree.Subdivide(&octree.root, depth);
+            prevDepth = depth;
+        }
+
+        // Rendering:
+        std::vector<BBVertex> vertices;
+        //std::vector<unsigned int> indices;
+        //unsigned int indexOffset{};
+        unsigned int nodeCount{};
+        getNodeMesh(octree.root, &vertices, &nodeCount);
+
+        SE::VertexBuffer vb{ &vertices[0], (unsigned int)vertices.size() * 6 * sizeof(float), SE::BufferUsage::STATIC_DRAW };
+        //SE::IndexBuffer ib{ &indices[0], SE::UNSIGNED_INT, (unsigned int)indices.size() * sizeof(unsigned int), SE::BufferUsage::STATIC_DRAW };
+        SE::VertexBufferLayout layout;
+        SE::VertexAttribute positions{ 3, SE::FLOAT };
+        SE::VertexAttribute colors{ 3, SE::FLOAT };
+        layout.add(positions);
+        layout.add(colors);
+        SE::VertexArray va;
+
+        va.add(vb, layout);
+
+        renderer.callCount = 0;
+        renderer.draw(va, 48 *  nodeCount, *shader.get(), *atlas.get(), SE::DrawMode::LINES);
+        
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+
     }
 
-    void drawNode(Octree::Node& node)
+    struct BBVertex
+    {
+        glm::vec3 position;
+        glm::vec3 color;
+    };
+    void getNodeMesh(Octree::Node& node, std::vector<BBVertex>* vertices, unsigned int* nodeCount)
     {
         glm::vec3 color;
         node.isLeaf() ? color = { 0.0f, 1.0f, 0.0f } : color = { 0.6f, 0.4f, 0.4f };
-        SE::BoundingBox bb{ node.scale, node.position, color};
-        renderer.draw(*bb.va.get(), *shader.get(), *atlas.get(), SE::DrawMode::LINES);
+
+        // Adding bounding box to vb & ib
+        glm::vec3 position{ node.scale / 2 + node.position.x, node.scale / 2 + node.position.y, node.scale / 2 + node.position.z };
+        // Vertices
+        // Near
+        vertices->push_back({ { -position.x, -position.y, position.z }, color });   // 0
+        vertices->push_back({ { -position.x, position.y, position.z }, color });    // 1
+
+        vertices->push_back({ { -position.x, position.y, position.z }, color });    // 1
+        vertices->push_back({ { position.x, position.y, position.z }, color });     // 2
+
+        vertices->push_back({ { position.x, position.y, position.z }, color });     // 2
+        vertices->push_back({ { position.x, -position.y, position.z }, color });    // 3
+
+        vertices->push_back({ { position.x, -position.y, position.z }, color });    // 3
+        vertices->push_back({ { -position.x, -position.y, position.z }, color });   // 0
+
+        // Far
+        vertices->push_back({ { position.x, -position.y, -position.z }, color });   // 4
+        vertices->push_back({ { position.x, position.y, -position.z }, color });    // 5
+
+        vertices->push_back({ { position.x, position.y, -position.z }, color });    // 5
+        vertices->push_back({ { -position.x, position.y, -position.z }, color });   // 6
+
+        vertices->push_back({ { -position.x, position.y, -position.z }, color });   // 6
+        vertices->push_back({ { -position.x, -position.y, -position.z }, color });  // 7
+
+        vertices->push_back({ { -position.x, -position.y, -position.z }, color });  // 7
+        vertices->push_back({ { position.x, -position.y, -position.z }, color });   // 4
+
+        // Left
+        vertices->push_back({ { -position.x, -position.y, -position.z }, color });  // 7
+        vertices->push_back({ { -position.x, position.y, -position.z }, color });   // 6
+
+        vertices->push_back({ { -position.x, position.y, -position.z }, color });   // 6
+        vertices->push_back({ { -position.x, position.y, position.z }, color });    // 1
+
+        vertices->push_back({ { -position.x, position.y, position.z }, color });    // 1
+        vertices->push_back({ { -position.x, -position.y, position.z }, color });   // 0
+
+        vertices->push_back({ { -position.x, -position.y, position.z }, color });   // 0
+        vertices->push_back({ { -position.x, -position.y, -position.z }, color });  // 7
+
+        // Right
+        vertices->push_back({ { position.x, -position.y, position.z }, color });    // 3
+        vertices->push_back({ { position.x, position.y, position.z }, color });     // 2
+
+        vertices->push_back({ { position.x, position.y, position.z }, color });     // 2
+        vertices->push_back({ { position.x, position.y, -position.z }, color });    // 5
+
+        vertices->push_back({ { position.x, position.y, -position.z }, color });    // 5
+        vertices->push_back({ { position.x, -position.y, -position.z }, color });   // 4
+
+        vertices->push_back({ { position.x, -position.y, -position.z }, color });   // 4
+        vertices->push_back({ { position.x, -position.y, position.z }, color });    // 3
+
+        // Bottom
+        vertices->push_back({ { -position.x, -position.y, -position.z }, color });  // 7
+        vertices->push_back({ { -position.x, -position.y, position.z }, color });   // 0
+
+        vertices->push_back({ { -position.x, -position.y, position.z }, color });   // 0
+        vertices->push_back({ { position.x, -position.y, position.z }, color });    // 3
+        
+        vertices->push_back({ { position.x, -position.y, position.z }, color });    // 3
+        vertices->push_back({ { position.x, -position.y, -position.z }, color });   // 4
+
+        vertices->push_back({ { position.x, -position.y, -position.z }, color });   // 4
+        vertices->push_back({ { -position.x, -position.y, -position.z }, color });  // 7
+
+        // Top
+        vertices->push_back({ { -position.x, position.y, position.z }, color });    // 1
+        vertices->push_back({ { -position.x, position.y, -position.z }, color });   // 6
+
+        vertices->push_back({ { -position.x, position.y, -position.z }, color });   // 6
+        vertices->push_back({ { position.x, position.y, -position.z }, color });    // 5
+
+        vertices->push_back({ { position.x, position.y, -position.z }, color });    // 5
+        vertices->push_back({ { position.x, position.y, position.z }, color });     // 2
+
+        vertices->push_back({ { position.x, position.y, position.z }, color });     // 2
+        vertices->push_back({ { -position.x, position.y, position.z }, color });    // 1
+
+        ++(*nodeCount);
+
+        //// Indices
+        //// Near
+        //indices->push_back(*offset + 0);    indices->push_back(*offset + 1);
+        //indices->push_back(*offset + 1);    indices->push_back(*offset + 2);
+        //indices->push_back(*offset + 2);    indices->push_back(*offset + 3);
+        //indices->push_back(*offset + 3);    indices->push_back(*offset + 0);
+        //// Far
+        //indices->push_back(*offset + 4);    indices->push_back(*offset + 5);
+        //indices->push_back(*offset + 5);    indices->push_back(*offset + 6);
+        //indices->push_back(*offset + 6);    indices->push_back(*offset + 7);
+        //indices->push_back(*offset + 7);    indices->push_back(*offset + 6);
+        //// Left
+        //indices->push_back(*offset + 7);    indices->push_back(*offset + 6);
+        //indices->push_back(*offset + 6);    indices->push_back(*offset + 1);
+        //indices->push_back(*offset + 1);    indices->push_back(*offset + 0);
+        //indices->push_back(*offset + 0);    indices->push_back(*offset + 7);
+        //// Right
+        //indices->push_back(*offset + 3);    indices->push_back(*offset + 2);
+        //indices->push_back(*offset + 2);    indices->push_back(*offset + 5);
+        //indices->push_back(*offset + 5);    indices->push_back(*offset + 4);
+        //indices->push_back(*offset + 4);    indices->push_back(*offset + 3);
+        //// Bottom
+        //indices->push_back(*offset + 7);    indices->push_back(*offset + 0);
+        //indices->push_back(*offset + 0);    indices->push_back(*offset + 3);
+        //indices->push_back(*offset + 3);    indices->push_back(*offset + 4);
+        //indices->push_back(*offset + 4);    indices->push_back(*offset + 7);
+        //// Top
+        //indices->push_back(*offset + 1);    indices->push_back(*offset + 6);
+        //indices->push_back(*offset + 6);    indices->push_back(*offset + 5);
+        //indices->push_back(*offset + 5);    indices->push_back(*offset + 2);
+        //indices->push_back(*offset + 2);    indices->push_back(*offset + 1);
+        //*offset += 8;
 
         if (!node.isLeaf())
         {
             for (int i{}; i < 8; ++i)
             {
-                drawNode(*node.childNodes[i]);
+                getNodeMesh(*node.childNodes[i], vertices, nodeCount);
             }
         }
 
     }
+    //void drawNode(Octree::Node& node)
+    //{
+    //    std::vector<BBVertex> vertices;
+    //    std::vector<unsigned int> indices;
+    //    unsigned int indexOffset{};
+    //    getNodeMesh(node, &vertices, &indices, &indexOffset);
+    //
+    //    SE::VertexBuffer vb{ &vertices[0], sizeof(vertices), SE::BufferUsage::STATIC_DRAW};
+    //    SE::VertexBufferLayout layout;
+    //    SE::VertexAttribute positions{ 3, SE::FLOAT };
+    //    SE::VertexAttribute colors{ 3, SE::FLOAT };
+    //    layout.add(positions);
+    //    layout.add(colors);
+    //    SE::VertexArray va;
+    //
+    //    va.add(vb, layout);
+    //    SE::IndexBuffer ib{ &indices[0], SE::UNSIGNED_INT, sizeof(indices), SE::BufferUsage::STATIC_DRAW };
+    //
+    //    renderer.draw(va, ib, *shader.get(), *atlas.get(), SE::DrawMode::LINES);
+    //}
 
     std::unique_ptr<SE::Camera> camera{ new SE::Camera(glm::vec3(0, 0, 5)) };
     std::unique_ptr<SE::Texture> atlas{ new SE::Texture{ "D:/Development/SandboxEngine/TestProject/resources/textures/atlas.png", true } };
@@ -285,10 +418,7 @@ public:
     bool cameraMode{ false };
     float octreeScale{ 1.0f };
     glm::vec3 octreePosition{ 0.0f, 0.0f, 0.0f };
-    int depth{ 2 };
+    int depth{ 0 };
     int prevDepth{ depth };
     Octree octree{ octreeScale, octreePosition };
-
-    std::unique_ptr<SE::VertexBuffer> vb;
-    std::unique_ptr<SE::VertexArray> va{ new SE::VertexArray() };
 };
