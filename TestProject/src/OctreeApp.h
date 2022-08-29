@@ -1,11 +1,7 @@
 #pragma once
 
-#include "Voxels.h"
-
 #include "SandboxEngine.h"
 
-#include "SandboxEngine/Graphics/Primitives/Plane.h"
-#include "SandboxEngine/Graphics/Primitives/Cube.h"
 #include "SandboxEngine/Graphics/Primitives/BoundingBox.h"
 
 #include "imgui.h"
@@ -19,6 +15,7 @@
 #include <memory>
 #include <vector>
 #include <array>
+
 
 enum OctreeIndices : unsigned int
 {
@@ -228,6 +225,34 @@ public:
             if (prevDepth != depth) octree.Subdivide(&octree.root, depth);
 
             // Rendering:
+            
+            //std::unique_ptr<SE::Mesh> octreeMesh{ getOctreeMesh(octree.root) };
+            //renderer.draw(*octreeMesh.get(), *shader.get(), *atlas.get(), SE::DrawMode::LINES);
+            //drawNode(octree.root);
+
+
+            //float vertices[8 * 6]{
+            //    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f,// -X -Y
+            //    -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, // -X +Y
+
+            //    -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, // -X +Y
+            //    0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, // +X +Y
+
+            //    0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, // +X +Y
+            //    0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f,// +X -Y
+
+            //    0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f,// +X -Y
+            //    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f,// -X -Y
+            //};
+            //vb.reset(new SE::VertexBuffer(vertices, sizeof(vertices), SE::BufferUsage::STATIC_DRAW));
+            //SE::VertexAttribute positionAttribute(3, SE::FLOAT);
+            //SE::VertexAttribute colorAttribute(3, SE::FLOAT);
+            //SE::VertexBufferLayout layout;
+            //layout.add(positionAttribute);
+            //layout.add(colorAttribute);
+            //va->add(*vb.get(), layout, 8);
+            //renderer.draw(*va.get(), *shader.get(), *atlas.get(), SE::DrawMode::LINES);
+
             drawNode(octree.root);
 
         }
@@ -241,10 +266,8 @@ public:
     {
         glm::vec3 color;
         node.isLeaf() ? color = { 0.0f, 1.0f, 0.0f } : color = { 0.6f, 0.4f, 0.4f };
-
-        shader->setUniform(SE::FLOAT_VEC3, "u_color", (void*)&color);
-        SE::BoundingBox bb{ node.scale, node.position };
-        renderer.draw(*bb.mesh.get(), *shader.get(), *atlas.get(), SE::DrawMode::LINES);
+        SE::BoundingBox bb{ node.scale, node.position, color};
+        renderer.draw(*bb.va.get(), *shader.get(), *atlas.get(), SE::DrawMode::LINES);
 
         if (!node.isLeaf())
         {
@@ -253,6 +276,7 @@ public:
                 drawNode(*node.childNodes[i]);
             }
         }
+
     }
 
     std::unique_ptr<SE::Camera> camera{ new SE::Camera(glm::vec3(0, 0, 5)) };
@@ -264,4 +288,7 @@ public:
     int depth{ 2 };
     int prevDepth{ depth };
     Octree octree{ octreeScale, octreePosition };
+
+    std::unique_ptr<SE::VertexBuffer> vb;
+    std::unique_ptr<SE::VertexArray> va{ new SE::VertexArray() };
 };

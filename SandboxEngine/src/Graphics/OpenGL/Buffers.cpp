@@ -76,8 +76,10 @@ void SE::VertexArray::bind() const
     glBindVertexArray(id);
 }
 
-void SE::VertexArray::add(VertexBuffer& vb, VertexBufferLayout& layout)
+void SE::VertexArray::add(VertexBuffer& vb, VertexBufferLayout& layout, const unsigned int vertexCount)
 {
+    this->vertexCount += vertexCount;
+
     this->bind();
     vb.bind();
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SandboxEngine\Graphics\Mesh.h"
+#include "SandboxEngine\Graphics.h"
 
 #include "glm/glm.hpp"
 
@@ -10,91 +10,101 @@ namespace SE
 {
     struct BoundingBox
     {
-        BoundingBox(const float scale = 1.0f, glm::vec3 position = { 0.0f, 0.0f, 0.0f })
+        BoundingBox(const float scale/* = 1.0f*/, glm::vec3 position/* = { 0.0f, 0.0f, 0.0f }*/, glm::vec3 color/* = {0.0f, 0.0f, 0.0f}*/)
         {
-            SE::Vertex vertices[48]{
+            float vertices[6 * 8 * 6]{ // 6 faces * 8 vertices per face * 6 floats per vertex
+                // Position                                                                     // Color
                 // Near
-                { {-(scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z}, {0, 0} }, // Near Bottom Left    // 0
-                { {-(scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z}, {0, 1} }, // Near Top Left       // 1
+                -(scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Bottom Left    // 0
+                -(scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Top Left       // 1
 
-                { {-(scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z}, {0, 1} }, // Near Top Left       // 1
-                { { (scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z}, {1, 1} }, // Near Top Right      // 2
+                -(scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Top Left       // 1
+                (scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Top Right      // 2
 
-                { { (scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z}, {1, 1} }, // Near Top Right      // 2
-                { { (scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z}, {1, 0} }, // Near Bottom Right   // 3
+                (scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Top Right      // 2
+                (scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Bottom Right   // 3
 
-                { { (scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z}, {1, 0} }, // Near Bottom Right   // 3
-                { {-(scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z}, {0, 0} }, // Near Bottom Left    // 0
+                (scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Bottom Right   // 3
+                -(scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Bottom Left    // 0
 
                 // Far
-                { { (scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z}, {0, 0} }, // Far Bottom Left     // 4
-                { { (scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z}, {0, 1} }, // Far Top Left        // 5
+                (scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b, // Far Bottom Left     // 4
+                (scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b, // Far Top Left        // 5
 
-                { { (scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z}, {0, 1} }, // Far Top Left        // 5
-                { {-(scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z}, {1, 1} }, // Far Top Right       // 6
+                (scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b, // Far Top Left        // 5
+                -(scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b, // Far Top Right       // 6
 
-                { {-(scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z}, {1, 1} }, // Far Top Right       // 6
-                { {-(scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z}, {1, 0} },  // Far Bottom Right    // 7
+                -(scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b, // Far Top Right       // 6
+                -(scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b,  // Far Bottom Right    // 7
 
-                { {-(scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z}, {1, 0} },  // Far Bottom Right    // 7
-                { { (scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z}, {0, 0} }, // Far Bottom Left     // 4
+                -(scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b,  // Far Bottom Right    // 7
+                (scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b, // Far Bottom Left     // 4
 
                 // Left
-                { {-(scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z}, {1, 0} },  // Far Bottom Right    // 7
-                { {-(scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z}, {1, 1} }, // Far Top Right       // 6
+                -(scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b,  // Far Bottom Right    // 7
+                -(scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b, // Far Top Right       // 6
 
-                { {-(scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z}, {1, 1} }, // Far Top Right       // 6
-                { {-(scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z}, {0, 1} }, // Near Top Left       // 1
+                -(scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b, // Far Top Right       // 6
+                -(scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Top Left       // 1
 
-                { {-(scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z}, {0, 1} }, // Near Top Left       // 1
-                { {-(scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z}, {0, 0} }, // Near Bottom Left    // 0
+                -(scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Top Left       // 1
+                -(scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Bottom Left    // 0
 
-                { {-(scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z}, {0, 0} }, // Near Bottom Left    // 0
-                { {-(scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z}, {1, 0} },  // Far Bottom Right   // 7
+                -(scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Bottom Left    // 0
+                -(scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b,  // Far Bottom Right   // 7
 
                 // Right
-                { { (scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z}, {1, 0} }, // Near Bottom Right   // 3
-                { { (scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z}, {1, 1} }, // Near Top Right      // 2
+                (scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Bottom Right   // 3
+                 (scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Top Right      // 2
 
-                { { (scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z}, {1, 1} }, // Near Top Right      // 2
-                { { (scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z}, {0, 1} }, // Far Top Left        // 5
+                 (scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Top Right      // 2
+                 (scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b, // Far Top Left        // 5
 
-                { { (scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z}, {0, 1} }, // Far Top Left        // 5
-                { { (scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z}, {0, 0} }, // Far Bottom Left     // 4
+                 (scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b, // Far Top Left        // 5
+                 (scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b, // Far Bottom Left     // 4
 
-                { { (scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z}, {0, 0} }, // Far Bottom Left     // 4
-                { { (scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z}, {1, 0} }, // Near Bottom Right   // 3
+                 (scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b, // Far Bottom Left     // 4
+                 (scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Bottom Right   // 3
 
                 // Bottom
-                { {-(scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z}, {1, 0} },  // Far Bottom Right   // 7
-                { {-(scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z}, {0, 0} }, // Near Bottom Left    // 0
+                -(scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b,  // Far Bottom Right   // 7
+                -(scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Bottom Left    // 0
 
-                { {-(scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z}, {0, 0} }, // Near Bottom Left    // 0
-                { { (scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z}, {1, 0} }, // Near Bottom Right   // 3
+                -(scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Bottom Left    // 0
+                 (scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Bottom Right   // 3
 
-                { { (scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z}, {1, 0} }, // Near Bottom Right   // 3
-                { { (scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z}, {0, 0} }, // Far Bottom Left     // 4
+                 (scale / 2) + position.x, -(scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Bottom Right   // 3
+                 (scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b, // Far Bottom Left     // 4
 
-                { { (scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z}, {0, 0} }, // Far Bottom Left     // 4
-                { {-(scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z}, {1, 0} },  // Far Bottom Right   // 7
+                 (scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b, // Far Bottom Left     // 4
+                -(scale / 2) + position.x, -(scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b,  // Far Bottom Right   // 7
 
                 // Top
-                { {-(scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z}, {0, 1} }, // Near Top Left       // 1
-                { {-(scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z}, {1, 1} }, // Far Top Right       // 6
+                -(scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Top Left       // 1
+                -(scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b, // Far Top Right       // 6
 
-                { {-(scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z}, {1, 1} }, // Far Top Right       // 6
-                { { (scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z}, {0, 1} }, // Far Top Left        // 5
+                -(scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b, // Far Top Right       // 6
+                 (scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b, // Far Top Left        // 5
 
-                { { (scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z}, {0, 1} }, // Far Top Left        // 5
-                { { (scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z}, {1, 1} }, // Near Top Right      // 2
+                 (scale / 2) + position.x,  (scale / 2) + position.y, -(scale / 2) + position.z, color.r, color.g, color.b, // Far Top Left        // 5
+                 (scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Top Right      // 2
 
-                { { (scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z}, {1, 1} }, // Near Top Right      // 2
-                { {-(scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z}, {0, 1} }, // Near Top Left       // 1
+                 (scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Top Right      // 2
+                -(scale / 2) + position.x,  (scale / 2) + position.y, (scale / 2) + position.z, color.r, color.g, color.b, // Near Top Left       // 1
 
             };
-            mesh.reset(new SE::Mesh(vertices, (unsigned int)sizeof(SE::Vertex) * 48, SE::BufferUsage::STATIC_DRAW));
+            vb.reset(new SE::VertexBuffer(vertices, sizeof(vertices), SE::BufferUsage::STATIC_DRAW));
+            
+            SE::VertexAttribute positionAttribute(3, SE::FLOAT);
+            SE::VertexAttribute colorAttribute(3, SE::FLOAT);
+            SE::VertexBufferLayout layout;
+            layout.add(positionAttribute);
+            layout.add(colorAttribute);
+            va->add(*vb.get(), layout, 48);
+
         }
-        std::unique_ptr<SE::Mesh> mesh;
+        std::unique_ptr<SE::VertexBuffer> vb;
+        std::unique_ptr<SE::VertexArray> va{ new SE::VertexArray() };
         //unsigned int indices[48]{
         //    // Near
         //    0, 1,

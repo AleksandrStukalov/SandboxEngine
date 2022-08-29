@@ -17,6 +17,7 @@ SandboxEngine/INSTALL.vcxproj.filters
 SandboxEngine/SandboxEngine.dir/
 SandboxEngine/SandboxEngine.vcxproj
 SandboxEngine/SandboxEngine.vcxproj.filters
+SandboxEngine/SandboxEngine.vcxproj.user
 SandboxEngine/cmake_install.cmake
 TestProject/CMakeFiles/
 TestProject/INSTALL.vcxproj
