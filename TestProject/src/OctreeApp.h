@@ -2,8 +2,6 @@
 
 #include "SandboxEngine.h"
 
-#include "SandboxEngine/Graphics/Primitives/BoundingBox.h"
-
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -153,6 +151,7 @@ public:
         camera->speed = 10.0f;
 
         octree.Subdivide(&octree.root, depth);
+        va.reset(getNodeVA(octree.root, &nodeCount));
 
         // Initializing ImGui:
         {
@@ -182,6 +181,8 @@ public:
 
     void onUpdate() override
     {
+        renderer.callCount = 0;
+
         // Toggling camera mode:
         if (cameraMode)  window.setCursorMode(SE::CursorMode::CAPTURE);
         else             window.setCursorMode(SE::CursorMode::STANDARD);
@@ -203,7 +204,7 @@ public:
                 ImGui::Text("Octree:");
                 ImGui::SliderFloat("Scale", &octreeScale, 0, 10);
                 ImGui::SliderFloat3("Position", &octreePosition.x, -10, 10);
-                ImGui::SliderInt("Subdivision count", &depth, 0, 7);
+                ImGui::SliderInt("Subdivision count", &depth, 0, 5);
                 ImGui::End();
             }
             ImGui::Render();
@@ -227,33 +228,15 @@ public:
         {
             octree.Subdivide(&octree.root, depth);
             prevDepth = depth;
+
+            va.reset(getNodeVA(octree.root, &nodeCount));
         }
 
         // Rendering:
-        std::vector<BBVertex> vertices;
-        //std::vector<unsigned int> indices;
-        //unsigned int indexOffset{};
-        unsigned int nodeCount{};
-        getNodeMesh(octree.root, &vertices, &nodeCount);
 
-        SE::VertexBuffer vb{ &vertices[0], (unsigned int)vertices.size() * 6 * sizeof(float), SE::BufferUsage::STATIC_DRAW };
-        //SE::IndexBuffer ib{ &indices[0], SE::UNSIGNED_INT, (unsigned int)indices.size() * sizeof(unsigned int), SE::BufferUsage::STATIC_DRAW };
-        SE::VertexBufferLayout layout;
-        SE::VertexAttribute positions{ 3, SE::FLOAT };
-        SE::VertexAttribute colors{ 3, SE::FLOAT };
-        layout.add(positions);
-        layout.add(colors);
-        SE::VertexArray va;
-
-        va.add(vb, layout);
-
-        renderer.callCount = 0;
-        renderer.draw(va, 48 *  nodeCount, *shader.get(), *atlas.get(), SE::DrawMode::LINES);
-        
+        renderer.draw(*va.get(), 48 * nodeCount, *shader.get(), *atlas.get(), SE::DrawMode::LINES);
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-
     }
 
     struct BBVertex
@@ -349,39 +332,6 @@ public:
 
         ++(*nodeCount);
 
-        //// Indices
-        //// Near
-        //indices->push_back(*offset + 0);    indices->push_back(*offset + 1);
-        //indices->push_back(*offset + 1);    indices->push_back(*offset + 2);
-        //indices->push_back(*offset + 2);    indices->push_back(*offset + 3);
-        //indices->push_back(*offset + 3);    indices->push_back(*offset + 0);
-        //// Far
-        //indices->push_back(*offset + 4);    indices->push_back(*offset + 5);
-        //indices->push_back(*offset + 5);    indices->push_back(*offset + 6);
-        //indices->push_back(*offset + 6);    indices->push_back(*offset + 7);
-        //indices->push_back(*offset + 7);    indices->push_back(*offset + 6);
-        //// Left
-        //indices->push_back(*offset + 7);    indices->push_back(*offset + 6);
-        //indices->push_back(*offset + 6);    indices->push_back(*offset + 1);
-        //indices->push_back(*offset + 1);    indices->push_back(*offset + 0);
-        //indices->push_back(*offset + 0);    indices->push_back(*offset + 7);
-        //// Right
-        //indices->push_back(*offset + 3);    indices->push_back(*offset + 2);
-        //indices->push_back(*offset + 2);    indices->push_back(*offset + 5);
-        //indices->push_back(*offset + 5);    indices->push_back(*offset + 4);
-        //indices->push_back(*offset + 4);    indices->push_back(*offset + 3);
-        //// Bottom
-        //indices->push_back(*offset + 7);    indices->push_back(*offset + 0);
-        //indices->push_back(*offset + 0);    indices->push_back(*offset + 3);
-        //indices->push_back(*offset + 3);    indices->push_back(*offset + 4);
-        //indices->push_back(*offset + 4);    indices->push_back(*offset + 7);
-        //// Top
-        //indices->push_back(*offset + 1);    indices->push_back(*offset + 6);
-        //indices->push_back(*offset + 6);    indices->push_back(*offset + 5);
-        //indices->push_back(*offset + 5);    indices->push_back(*offset + 2);
-        //indices->push_back(*offset + 2);    indices->push_back(*offset + 1);
-        //*offset += 8;
-
         if (!node.isLeaf())
         {
             for (int i{}; i < 8; ++i)
@@ -391,26 +341,23 @@ public:
         }
 
     }
-    //void drawNode(Octree::Node& node)
-    //{
-    //    std::vector<BBVertex> vertices;
-    //    std::vector<unsigned int> indices;
-    //    unsigned int indexOffset{};
-    //    getNodeMesh(node, &vertices, &indices, &indexOffset);
-    //
-    //    SE::VertexBuffer vb{ &vertices[0], sizeof(vertices), SE::BufferUsage::STATIC_DRAW};
-    //    SE::VertexBufferLayout layout;
-    //    SE::VertexAttribute positions{ 3, SE::FLOAT };
-    //    SE::VertexAttribute colors{ 3, SE::FLOAT };
-    //    layout.add(positions);
-    //    layout.add(colors);
-    //    SE::VertexArray va;
-    //
-    //    va.add(vb, layout);
-    //    SE::IndexBuffer ib{ &indices[0], SE::UNSIGNED_INT, sizeof(indices), SE::BufferUsage::STATIC_DRAW };
-    //
-    //    renderer.draw(va, ib, *shader.get(), *atlas.get(), SE::DrawMode::LINES);
-    //}
+    SE::VertexArray* getNodeVA(Octree::Node& node, unsigned int* nodeCount)
+    {
+        std::vector<BBVertex> vertices;
+        getNodeMesh(octree.root, &vertices, nodeCount);
+
+        vb.reset(new SE::VertexBuffer{ &vertices[0], (unsigned int)vertices.size() * 6 * sizeof(float), SE::BufferUsage::STATIC_DRAW });
+        SE::VertexBufferLayout layout;
+        SE::VertexAttribute positions{ 3, SE::FLOAT };
+        SE::VertexAttribute colors{ 3, SE::FLOAT };
+        layout.add(positions);
+        layout.add(colors);
+        SE::VertexArray* vertexArray = new SE::VertexArray();
+
+        vertexArray->add(*vb.get(), layout);
+
+        return vertexArray;
+    }
 
     std::unique_ptr<SE::Camera> camera{ new SE::Camera(glm::vec3(0, 0, 5)) };
     std::unique_ptr<SE::Texture> atlas{ new SE::Texture{ "D:/Development/SandboxEngine/TestProject/resources/textures/atlas.png", true } };
@@ -421,4 +368,7 @@ public:
     int depth{ 0 };
     int prevDepth{ depth };
     Octree octree{ octreeScale, octreePosition };
+    std::unique_ptr<SE::VertexArray> va;
+    std::unique_ptr<SE::VertexBuffer> vb;
+    unsigned int nodeCount{ 0 };
 };

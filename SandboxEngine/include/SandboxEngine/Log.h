@@ -19,6 +19,7 @@ namespace SE
         {
             message.insert(message.begin(), "Warning: ");
             print(message);
+            __debugbreak();
         }
         inline static void error(std::vector<std::string> message)
         {
