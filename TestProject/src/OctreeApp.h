@@ -17,14 +17,19 @@
 
 enum OctreeIndices : unsigned int
 {
-    BottomLeftFront = 0,
-    TopLeftFront = 1,
-    TopRightFront = 2,
-    BottomRightFront = 3,
-    BottomLeftBack = 4,
-    TopLeftBack = 5,
-    TopRightBack = 6,
-    BottomRightBack = 7
+    BottomLeftFront = 0,     // 000
+    BottomLeftBack = 1,      // 001
+    BottomRightFront = 2,    // 010
+    BottomRightBack = 3,     // 011
+    TopLeftFront = 4,        // 100
+    TopLeftBack = 5,         // 101
+    TopRightFront = 6,       // 110
+    TopRightBack = 7         // 111
+
+    // NOTE: What each bit represents whether node is at the:
+    // * Left bit -> bottom(0) or top(1)
+    // * Middle bit -> left(0) or right(1)
+    // * Right bit -> front(0) or back(1)
 };
 struct Octree
 {
@@ -39,13 +44,13 @@ struct Octree
         {
             return (
                 childNodes[BottomLeftFront] == nullptr &&
-                childNodes[TopLeftFront] == nullptr &&
-                childNodes[TopRightFront] == nullptr &&
-                childNodes[BottomRightFront] == nullptr &&
                 childNodes[BottomLeftBack] == nullptr &&
+                childNodes[BottomRightFront] == nullptr &&
+                childNodes[BottomRightBack] == nullptr &&
+                childNodes[TopLeftFront] == nullptr &&
                 childNodes[TopLeftBack] == nullptr &&
-                childNodes[TopRightBack] == nullptr &&
-                childNodes[BottomRightBack] == nullptr
+                childNodes[TopRightFront] == nullptr &&
+                childNodes[TopRightBack] == nullptr
                 );
         }
 
@@ -75,45 +80,45 @@ struct Octree
         if (depth > 0)
         {
             // Initializing given node's childNodes:
-            node->childNodes[BottomLeftFront] = new Node(node->scale / 2, {
-                    node->position.x - node->scale / 4,
-                    node->position.y - node->scale / 4,
-                    node->position.z + node->scale / 4,
+            node->childNodes[BottomLeftFront] = new Node(node->scale * 0.5, {
+                    node->position.x - node->scale * 0.25,
+                    node->position.y - node->scale * 0.25,
+                    node->position.z + node->scale * 0.25,
                 });
-            node->childNodes[TopLeftFront] = new Node(node->scale / 2, {
-                    node->position.x - node->scale / 4,
-                    node->position.y + node->scale / 4,
-                    node->position.z + node->scale / 4,
+            node->childNodes[BottomLeftBack] = new Node(node->scale * 0.5, {
+                    node->position.x - node->scale * 0.25,
+                    node->position.y - node->scale * 0.25,
+                    node->position.z - node->scale * 0.25,
                 });
-            node->childNodes[TopRightFront] = new Node(node->scale / 2, {
-                    node->position.x + node->scale / 4,
-                    node->position.y + node->scale / 4,
-                    node->position.z + node->scale / 4,
+            node->childNodes[BottomRightFront] = new Node(node->scale * 0.5, {
+                    node->position.x + node->scale * 0.25,
+                    node->position.y - node->scale * 0.25,
+                    node->position.z + node->scale * 0.25,
                 });
-            node->childNodes[BottomRightFront] = new Node(node->scale / 2, {
-                    node->position.x + node->scale / 4,
-                    node->position.y - node->scale / 4,
-                    node->position.z + node->scale / 4,
+            node->childNodes[BottomRightBack] = new Node(node->scale * 0.5, {
+                    node->position.x + node->scale * 0.25,
+                    node->position.y - node->scale * 0.25,
+                    node->position.z - node->scale * 0.25,
                 });
-            node->childNodes[BottomLeftBack] = new Node(node->scale / 2, {
-                    node->position.x - node->scale / 4,
-                    node->position.y - node->scale / 4,
-                    node->position.z - node->scale / 4,
+            node->childNodes[TopLeftFront] = new Node(node->scale * 0.5, {
+                    node->position.x - node->scale * 0.25,
+                    node->position.y + node->scale * 0.25,
+                    node->position.z + node->scale * 0.25,
                 });
-            node->childNodes[TopLeftBack] = new Node(node->scale / 2, {
-                    node->position.x - node->scale / 4,
-                    node->position.y + node->scale / 4,
-                    node->position.z - node->scale / 4,
+            node->childNodes[TopLeftBack] = new Node(node->scale * 0.5, {
+                    node->position.x - node->scale * 0.25,
+                    node->position.y + node->scale * 0.25,
+                    node->position.z - node->scale * 0.25,
                 });
-            node->childNodes[TopRightBack] = new Node(node->scale / 2, {
-                    node->position.x + node->scale / 4,
-                    node->position.y + node->scale / 4,
-                    node->position.z - node->scale / 4,
+            node->childNodes[TopRightFront] = new Node(node->scale * 0.5, {
+                    node->position.x + node->scale * 0.25,
+                    node->position.y + node->scale * 0.25,
+                    node->position.z + node->scale * 0.25,
                 });
-            node->childNodes[BottomRightBack] = new Node(node->scale / 2, {
-                    node->position.x + node->scale / 4,
-                    node->position.y - node->scale / 4,
-                    node->position.z - node->scale / 4,
+            node->childNodes[TopRightBack] = new Node(node->scale * 0.5, {
+                    node->position.x + node->scale * 0.25,
+                    node->position.y + node->scale * 0.25,
+                    node->position.z - node->scale * 0.25,
                 });
 
             for (int i{}; i < 8; ++i)
@@ -233,8 +238,9 @@ public:
         }
 
         // Rendering:
-
         renderer.draw(*va.get(), 48 * nodeCount, *shader.get(), *atlas.get(), SE::DrawMode::LINES);
+
+        // TODO: Replace division with multiplication
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
@@ -250,7 +256,7 @@ public:
         node.isLeaf() ? color = { 0.0f, 1.0f, 0.0f } : color = { 0.6f, 0.4f, 0.4f };
 
         // Adding bounding box to vb & ib
-        glm::vec3 position{ node.scale / 2 + node.position.x, node.scale / 2 + node.position.y, node.scale / 2 + node.position.z };
+        glm::vec3 position{ node.scale * 0.5 + node.position.x, node.scale * 0.5 + node.position.y, node.scale * 0.5 + node.position.z };
         // Vertices
         // Near
         vertices->push_back({ { -position.x, -position.y, position.z }, color });   // 0
