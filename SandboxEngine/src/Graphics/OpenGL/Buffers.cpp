@@ -7,8 +7,8 @@ unsigned int SE::getPlatformBufferUsage(SE::BufferUsage usage)
 {
     switch (usage)
     {
-    case SE::STATIC_DRAW:   return GL_STATIC_DRAW;
-    case SE::DYNAMIC_DRAW:  return GL_DYNAMIC_DRAW;
+    case SE::BufferUsage::STATIC_DRAW:   return GL_STATIC_DRAW;
+    case SE::BufferUsage::DYNAMIC_DRAW:  return GL_DYNAMIC_DRAW;
     default:                SE::Log::error({ "Unsupported SE buffer usage: ", (const char*)usage }); return -1;
     }
 }
@@ -34,7 +34,7 @@ void SE::VertexBuffer::bind() const
 
 void SE::VertexBuffer::add(const void* data, const unsigned int size, const unsigned int offset)
 {
-    if (usage != SE::DYNAMIC_DRAW) SE::Log::error({ "Can't add data to static buffer" });
+    if (usage == SE::BufferUsage::STATIC_DRAW) SE::Log::error({ "Can't add data to static buffer" });
     bind();
     glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 }

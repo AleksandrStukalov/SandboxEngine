@@ -7,7 +7,7 @@
 namespace SE
 {
     enum Type;
-    enum BufferUsage
+    enum class BufferUsage
     {
         STATIC_DRAW,
         DYNAMIC_DRAW

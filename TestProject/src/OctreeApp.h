@@ -14,6 +14,111 @@
 #include <vector>
 #include <array>
 
+struct BoundingBox
+{
+    BoundingBox(float scale, glm::vec3 position, glm::vec3 color)
+    {
+        glm::vec3 pos{ (scale * 0.5) + position.x, (scale * 0.5) + position.y, (scale * 0.5) + position.z };
+        float vertices[48 * 6]{
+            // Near
+            -pos.x, -pos.y, pos.z, color.r, color.g, color.b, // Near Bottom Left    // 0
+            -pos.x, pos.y, pos.z, color.r, color.g, color.b, // Near Top Left       // 1
+
+            -pos.x, pos.y, pos.z, color.r, color.g, color.b, // Near Top Left       // 1
+            pos.x, pos.y, pos.z, color.r, color.g, color.b, // Near Top Right      // 2
+
+            pos.x, pos.y, pos.z, color.r, color.g, color.b, // Near Top Right      // 2
+            pos.x, -pos.y, pos.z, color.r, color.g, color.b, // Near Bottom Right   // 3
+
+            pos.x, -pos.y, pos.z, color.r, color.g, color.b, // Near Bottom Right   // 3
+            -pos.x, -pos.y, pos.z, color.r, color.g, color.b, // Near Bottom Left    // 0
+
+            // Far
+            pos.x, -pos.y, -pos.z, color.r, color.g, color.b, // Far Bottom Left     // 4
+            pos.x, pos.y, -pos.z, color.r, color.g, color.b, // Far Top Left        // 5
+
+            pos.x, pos.y, -pos.z, color.r, color.g, color.b, // Far Top Left        // 5
+            -pos.x, pos.y, -pos.z, color.r, color.g, color.b, // Far Top Right       // 6
+
+            -pos.x, pos.y, -pos.z, color.r, color.g, color.b, // Far Top Right       // 6
+            -pos.x, -pos.y, -pos.z, color.r, color.g, color.b,  // Far Bottom Right    // 7
+
+            -pos.x, -pos.y, -pos.z, color.r, color.g, color.b,  // Far Bottom Right    // 7
+            pos.x, -pos.y, -pos.z, color.r, color.g, color.b, // Far Bottom Left     // 4
+
+            // Left
+            -pos.x, -pos.y, -pos.z, color.r, color.g, color.b,  // Far Bottom Right    // 7
+            -pos.x, pos.y, -pos.z, color.r, color.g, color.b,  // Far Top Right       // 6
+
+            -pos.x, pos.y, -pos.z, color.r, color.g, color.b,  // Far Top Right       // 6
+            -pos.x, pos.y, pos.z, color.r, color.g, color.b, // Near Top Left       // 1
+
+            -pos.x, pos.y, pos.z, color.r, color.g, color.b, // Near Top Left       // 1
+            -pos.x, -pos.y, pos.z, color.r, color.g, color.b, // Near Bottom Left    // 0
+
+            -pos.x, -pos.y, pos.z, color.r, color.g, color.b, // Near Bottom Left    // 0
+            -pos.x, -pos.y, -pos.z, color.r, color.g, color.b,  // Far Bottom Right    // 7
+            
+            // Right
+            pos.x, -pos.y, pos.z, color.r, color.g, color.b, // Near Bottom Right   // 3
+            pos.x, pos.y, pos.z, color.r, color.g, color.b, // Near Top Right      // 2
+
+            pos.x, pos.y, pos.z, color.r, color.g, color.b, // Near Top Right      // 2
+            pos.x, pos.y, -pos.z, color.r, color.g, color.b, // Far Top Left        // 5
+
+            pos.x, pos.y, -pos.z, color.r, color.g, color.b, // Far Top Left        // 5
+            pos.x, -pos.y, -pos.z, color.r, color.g, color.b, // Far Bottom Left     // 4
+
+            pos.x, -pos.y, -pos.z, color.r, color.g, color.b, // Far Bottom Left     // 4
+            pos.x, -pos.y, pos.z, color.r, color.g, color.b, // Near Bottom Right   // 3
+
+            // Bottom
+            -pos.x, -pos.y, -pos.z, color.r, color.g, color.b,  // Far Bottom Right    // 7
+            -pos.x, -pos.y, pos.z, color.r, color.g, color.b, // Near Bottom Left    // 0
+
+            -pos.x, -pos.y, pos.z, color.r, color.g, color.b, // Near Bottom Left    // 0
+            pos.x, -pos.y, pos.z, color.r, color.g, color.b, // Near Bottom Right   // 3
+        
+            pos.x, -pos.y, pos.z, color.r, color.g, color.b, // Near Bottom Right   // 3
+            pos.x, -pos.y, -pos.z, color.r, color.g, color.b, // Far Bottom Left     // 4
+            
+            pos.x, -pos.y, -pos.z, color.r, color.g, color.b, // Far Bottom Left     // 4
+            -pos.x, -pos.y, -pos.z, color.r, color.g, color.b,  // Far Bottom Right    // 7
+        
+            // Top
+            -pos.x, pos.y, pos.z, color.r, color.g, color.b, // Near Top Left       // 1
+            -pos.x, pos.y, -pos.z, color.r, color.g, color.b,  // Far Top Right       // 6
+            
+            -pos.x, pos.y, -pos.z, color.r, color.g, color.b,  // Far Top Right       // 6
+            pos.x, pos.y, -pos.z, color.r, color.g, color.b, // Far Top Left        // 5
+            
+            pos.x, pos.y, -pos.z, color.r, color.g, color.b, // Far Top Left        // 5
+            pos.x, pos.y, pos.z, color.r, color.g, color.b, // Near Top Right      // 2
+            
+            pos.x, pos.y, pos.z, color.r, color.g, color.b, // Near Top Right      // 2
+            -pos.x, pos.y, pos.z, color.r, color.g, color.b, // Near Top Left       // 1
+        };
+        vb = new SE::VertexBuffer(vertices, sizeof(vertices), SE::BufferUsage::STATIC_DRAW);
+        SE::VertexAttribute positions(3, SE::FLOAT);
+        SE::VertexAttribute colors(3, SE::FLOAT);
+        SE::VertexBufferLayout layout;
+        layout.add(positions);
+        layout.add(colors);
+        va = new SE::VertexArray();
+        va->add(*vb, layout);
+    }
+    ~BoundingBox()
+    {
+        delete vb;
+        vb = nullptr;
+        delete va;
+        va = nullptr;
+    }
+
+    SE::VertexBuffer* vb;
+    SE::VertexArray* va;
+};
+
 enum OctreeIndices : unsigned int
 {
     BottomLeftFront = 0,     // 000
@@ -242,8 +347,6 @@ public:
             }
             ImGui::Render();
         }
-
-        // Transforming & Rendering:
         
         // Transformation:
         {
@@ -266,8 +369,10 @@ public:
         }
 
         // Rendering:
-        DrawPoint(point);
-        renderer.draw(*va.get(), 48 * nodeCount, *shader.get(), *atlas.get(), SE::DrawMode::LINES);
+        //DrawPoint(point);
+        //renderer.draw(*va.get(), 48 * nodeCount, *shader.get(), *atlas.get(), SE::DrawMode::LINES);
+        BoundingBox bb(1.0f, {0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f });
+        renderer.draw(*bb.va, 48, *shader.get(), *atlas.get(), SE::DrawMode::LINES);
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
