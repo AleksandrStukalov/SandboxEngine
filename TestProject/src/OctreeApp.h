@@ -139,8 +139,8 @@ enum OctreeIndices : unsigned int
 };
 struct Octree
 {
-    Octree(const float scale, const glm::vec3 position, unsigned int depth)
-        : root{ scale, position }, depth{ depth } {}
+    Octree(const float scale, const glm::vec3 position, const glm::vec3 color, unsigned int depth)
+        : root{ scale, position, color }, depth{ depth } {}
 
     void Insert(const glm::vec3 position)
     {
@@ -149,8 +149,8 @@ struct Octree
 
     struct Node
     {
-        Node(const float scale = 1.0f, const glm::vec3 position = { 0.0f, 0.0f, 0.0f })
-            : scale(scale), position(position) {}
+        Node(const float scale, const glm::vec3 position, const glm::vec3 color)
+            : scale(scale), position(position), color(color), bb(scale, position, color) {}
 
         bool IsLeaf()
         {
@@ -179,45 +179,77 @@ struct Octree
             if (this->IsLeaf())
                 {
                     // Initializing childNodes:
-                    childNodes[BottomLeftFront] = new Node(scale * 0.5, {
-                            position.x - scale * 0.25,
-                            position.y - scale * 0.25,
-                            position.z + scale * 0.25,
+                childNodes[BottomLeftFront] = new Node(scale * 0.5, {
+                        position.x - scale * 0.25,
+                        position.y - scale * 0.25,
+                        position.z + scale * 0.25 },
+                        {
+                        this->color.x + 0.1,
+                        this->color.y + 0.1,
+                        this->color.z + 0.1,
                         });
                     childNodes[BottomLeftBack] = new Node(scale * 0.5, {
-                            position.x - scale * 0.25,
-                            position.y - scale * 0.25,
-                            position.z - scale * 0.25,
+                        position.x - scale * 0.25,
+                        position.y - scale * 0.25,
+                        position.z - scale * 0.25 },
+                        {
+                        this->color.x + 0.1,
+                        this->color.y + 0.1,
+                        this->color.z + 0.1,
                         });
                     childNodes[BottomRightFront] = new Node(scale * 0.5, {
                             position.x + scale * 0.25,
                             position.y - scale * 0.25,
-                            position.z + scale * 0.25,
+                            position.z + scale * 0.25 },
+                        {
+                        this->color.x + 0.1,
+                        this->color.y + 0.1,
+                        this->color.z + 0.1,
                         });
                     childNodes[BottomRightBack] = new Node(scale * 0.5, {
                             position.x + scale * 0.25,
                             position.y - scale * 0.25,
-                            position.z - scale * 0.25,
+                            position.z - scale * 0.25 },
+                        {
+                        this->color.x + 0.1,
+                        this->color.y + 0.1,
+                        this->color.z + 0.1,
                         });
                     childNodes[TopLeftFront] = new Node(scale * 0.5, {
                             position.x - scale * 0.25,
                             position.y + scale * 0.25,
-                            position.z + scale * 0.25,
+                            position.z + scale * 0.25 },
+                        {
+                        this->color.x + 0.1,
+                        this->color.y + 0.1,
+                        this->color.z + 0.1,
                         });
                     childNodes[TopLeftBack] = new Node(scale * 0.5, {
                             position.x - scale * 0.25,
                             position.y + scale * 0.25,
-                            position.z - scale * 0.25,
+                            position.z - scale * 0.25 },
+                        {
+                        this->color.x + 0.1,
+                        this->color.y + 0.1,
+                        this->color.z + 0.1,
                         });
                     childNodes[TopRightFront] = new Node(scale * 0.5, {
                             position.x + scale * 0.25,
                             position.y + scale * 0.25,
-                            position.z + scale * 0.25,
+                            position.z + scale * 0.25 },
+                        {
+                        this->color.x + 0.1,
+                        this->color.y + 0.1,
+                        this->color.z + 0.1,
                         });
                     childNodes[TopRightBack] = new Node(scale * 0.5, {
                             position.x + scale * 0.25,
                             position.y + scale * 0.25,
-                            position.z - scale * 0.25,
+                            position.z - scale * 0.25 },
+                        {
+                        this->color.x + 0.1,
+                        this->color.y + 0.1,
+                        this->color.z + 0.1,
                         });
                 }
 
@@ -245,6 +277,7 @@ struct Octree
 
         float scale;
         glm::vec3 position;
+        glm::vec3 color;
         Node* childNodes[8]{
             nullptr,
             nullptr,
@@ -255,8 +288,7 @@ struct Octree
             nullptr,
             nullptr,
         };
-
-
+        BoundingBox bb;
     };
 
 
@@ -371,8 +403,7 @@ public:
         // Rendering:
         //DrawPoint(point);
         //renderer.draw(*va.get(), 48 * nodeCount, *shader.get(), *atlas.get(), SE::DrawMode::LINES);
-        BoundingBox bb(1.0f, {0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f });
-        renderer.draw(*bb.va, 48, *shader.get(), *atlas.get(), SE::DrawMode::LINES);
+        DrawNodes(octree.root);
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
@@ -514,6 +545,20 @@ public:
         vertarray.add(vertbuffer, layout);
         renderer.draw(vertarray, 1, *shader.get(), *atlas.get(), SE::DrawMode::POINTS);
     }
+    void DrawNodes(Octree::Node& node)
+    {
+        if (!node.IsLeaf())
+        {
+            for (auto childNode : node.childNodes)
+            {
+                DrawNodes(*childNode);
+            }
+        }
+        else
+        {
+            renderer.draw(*node.bb.va, 48, *shader.get(), *atlas.get(), SE::DrawMode::LINES);
+        }
+    }
 
     std::unique_ptr<SE::Camera> camera{ new SE::Camera(glm::vec3(0, 0, 5)) };
     std::unique_ptr<SE::Texture> atlas{ new SE::Texture{ "D:/Development/SandboxEngine/TestProject/resources/textures/atlas.png", true } };
@@ -522,7 +567,8 @@ public:
 
     float octreeScale{ 1.0f };
     glm::vec3 octreePosition{ 0.0f, 0.0f, 0.0f };
-    Octree octree{ octreeScale, octreePosition, 4 };
+    glm::vec3 octreeColor{ 0.1f, 0.2f, 0.3f };
+    Octree octree{ octreeScale, octreePosition, octreeColor, 3 };
     std::unique_ptr<SE::VertexArray> va;
     std::unique_ptr<SE::VertexBuffer> vb;
     unsigned int nodeCount{ 0 };
