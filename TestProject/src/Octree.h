@@ -116,6 +116,60 @@ struct BoundingBox
     SE::VertexArray* va;
 };
 
+struct Octree
+{
+    Octree(const float scale, const glm::vec3 position, const glm::vec3 color, const unsigned int depth)
+        : root(scale, position, color), depth(depth) {}
+    
+    enum Indices : unsigned int
+    {
+        BottomLeftFront = 0,     // 000
+        BottomLeftBack = 1,      // 001
+        BottomRightFront = 2,    // 010
+        BottomRightBack = 3,     // 011
+        TopLeftFront = 4,        // 100
+        TopLeftBack = 5,         // 101
+        TopRightFront = 6,       // 110
+        TopRightBack = 7         // 111
+
+        // NOTE: What each bit represents whether node is at the:
+        // * Right bit -> front(0) or back(1)
+        // * Middle bit -> left(0) or right(1)
+        // * Left bit -> bottom(0) or top(1)
+
+        // TODO: Try to make the same thing using values with 0b prefix
+    };
+    struct Node
+    {
+        Node(const float scale, const glm::vec3 position, const glm::vec3 color)
+            : scale(scale), position(position), color(color), bb(scale, position, color) {}
+
+        void Subdivide(unsigned int depth)
+        {
+            if (depth > 0)
+            {
+                if (this->childNodes == nullptr) {
+                    // Initializing childNodes:
+                    this->childNodes = new Node* [8];
+                    for (int i{}; i < 8; ++i)
+                    {
+                        
+                    }
+                }
+            }
+        }
+
+        float scale;
+        glm::vec3 position;
+        glm::vec3 color;
+        BoundingBox bb;
+        Node** childNodes;
+    };
+
+    Node root;
+    unsigned int depth;
+};
+
 class OctreeApp : public SE::Application
 {
 public:

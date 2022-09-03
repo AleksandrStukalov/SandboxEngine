@@ -51,14 +51,6 @@ struct BoundingSquare
     SE::VertexArray* va;
 };
 
-enum QuadtreeIndex
-{
-    TopLeft = 0,    //00
-    TopRight = 1,   //01
-    BottomLeft = 2, //10
-    BottomRight = 3 //11
-    // NOTE: Left bit represents whether node is on top(0) or on bottom(1), and right bit represents whether it's left(0) or right(1)
-};
 struct Quadtree
 {
     Quadtree(const float scale, const glm::vec3 position, const glm::vec3 color, unsigned int depth)
@@ -68,6 +60,15 @@ struct Quadtree
     {
         root.Subdivide(point, depth);
     }
+
+    enum Index : unsigned int
+    {
+        TopLeft = 0b00,
+        TopRight = 0b01,
+        BottomLeft = 0b10,
+        BottomRight = 0b11
+        // NOTE: Left bit represents whether node is on top(0) or on bottom(1), and right bit represents whether it's left(0) or right(1)
+    };
 
     struct Node
     {
@@ -83,8 +84,8 @@ struct Quadtree
                 if (this->childNodes == nullptr)
                 {
                     // Initializing childNodes:
-                    this->childNodes = new Node* [8];
-                    for (int i{}; i < 8; ++i)
+                    this->childNodes = new Node* [4];
+                    /*for (int i{}; i < 4; ++i)
                     {
                         // Getting position:
                         glm::vec3 childPos = this->position;
@@ -98,13 +99,36 @@ struct Quadtree
 
                         // Getting color:
                         glm::vec3 childColor{
-                            this->color.r - 0.3,
-                            this->color.g - 0.3,
-                            this->color.b - 0.3,
+                            this->color.r - 0.15,
+                            this->color.g - 0.15,
+                            this->color.b - 0.15,
                         };
 
                         childNodes[i] = new Node(this->scale * 0.5f, childPos, childColor);
-                    }
+                    }*/
+
+                    glm::vec3 childColor{
+                        this->color.x - 0.15,
+                        this->color.y - 0.15,
+                        this->color.z - 0.15,
+                    };
+                    this->childNodes[TopLeft] = new Node{ this->scale * 0.5f, {
+                        this->position.x - this->scale * 0.25f,
+                        this->position.y + this->scale * 0.25f,
+                        this->position.z }, childColor };
+                    this->childNodes[TopRight] = new Node{ this->scale * 0.5f, {
+                        this->position.x + this->scale * 0.25f,
+                        this->position.y + this->scale * 0.25f,
+                        this->position.z }, childColor };
+                    this->childNodes[BottomLeft] = new Node{ this->scale * 0.5f, {
+                        this->position.x - this->scale * 0.25f,
+                        this->position.y - this->scale * 0.25f,
+                        this->position.z }, childColor };
+                    this->childNodes[BottomRight] = new Node{ this->scale * 0.5f, {
+                        this->position.x + this->scale * 0.25f,
+                        this->position.y - this->scale * 0.25f,
+                        this->position.z }, childColor };
+
                 }
 
                 this->childNodes[childIndex]->Subdivide(point, depth - 1);
@@ -116,12 +140,12 @@ struct Quadtree
         // Gets index of the child node, in which given point is located
         unsigned int GetPointIndex(glm::vec3 point)
         {
-            unsigned int index{ 0 };
+            unsigned int index{ 0b00 };
 
             // Bottom or Top:
-            index |= point.y > this->position.y ? 0 : 2/*0b010*/;
+            index |= point.y > this->position.y ? 0b00 : 0b10;
             // Left or Right:
-            index |= point.x < this->position.x ? 0 : 1/*0b001*/;
+            index |= point.x < this->position.x ? 0b00 : 0b01;
 
             return index;
         }
@@ -130,7 +154,7 @@ struct Quadtree
         {
             if (this->childNodes != nullptr)
             {
-                for (int i{}; i < 8; ++i)
+                for (int i{}; i < 4; ++i)
                 {
                     this->childNodes[i]->DeleteChildNodes();
                 }
@@ -261,7 +285,7 @@ public:
     {
         if (node.childNodes != nullptr)
         {
-            for (int i{}; i < 8; ++i)
+            for (int i{}; i < 4; ++i)
             {
                 DrawNodes(*node.childNodes[i]);
             }
