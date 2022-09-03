@@ -63,9 +63,9 @@ struct Quadtree
     Quadtree(const float scale, const glm::vec3 position, const glm::vec3 color, unsigned int depth)
         : root(scale, position, color), depth(depth){}
 
-    void Insert()
+    void Insert(const glm::vec3 point)
     {
-        root.Subdivide(depth);
+        root.Subdivide(point, depth);
     }
 
     struct Node
@@ -73,10 +73,12 @@ struct Quadtree
         Node(const float scale, const glm::vec3 position, const glm::vec3 color)
             : scale(scale), position(position), color(color), bs(scale, position, color) {}
 
-        void Subdivide(unsigned int depth)
+        void Subdivide(const glm::vec3 point, unsigned int depth)
         {
             if (depth > 0)
             {
+                unsigned int childIndex{ GetPointIndex(point) };
+
                 if (this->childNodes == nullptr)
                 {
                     // Initializing childNodes:
@@ -104,14 +106,35 @@ struct Quadtree
                     }
                 }
 
-                /*for (int i{}; i < 8; ++i)
-                {
-                    this->childNodes[i]->Subdivide(depth - 1);
-                }*/
-                this->childNodes[BottomLeft]->Subdivide(depth - 1);
+                this->childNodes[childIndex]->Subdivide(point, depth - 1);
 
             }
 
+        }
+
+        // Gets index of the child node, in which given point is located
+        unsigned int GetPointIndex(glm::vec3 point)
+        {
+            unsigned int index{ 0 };
+
+            // Bottom or Top:
+            index |= point.y > this->position.y ? 0 : 2/*0b010*/;
+            // Left or Right:
+            index |= point.x < this->position.x ? 0 : 1/*0b001*/;
+
+            return index;
+        }
+
+        void DeleteChildNodes()
+        {
+            if (this->childNodes != nullptr)
+            {
+                for (int i{}; i < 8; ++i)
+                {
+                    this->childNodes[i]->DeleteChildNodes();
+                }
+                this->childNodes = nullptr;
+            }
         }
 
         float scale;
@@ -146,7 +169,7 @@ public:
     QuadtreeApp()
         : Application("QuadtreeApp", 1920, 1080)
     {
-        quadtree.Insert();
+        quadtree.Insert(point);
         
         // Initializing ImGui:
         {
@@ -193,6 +216,11 @@ public:
                 ImGui::Text("   Press 'C' to toggle camera mode");
                 ImGui::Text("   Scroll to adjust speed");
                 ImGui::Text("   Speed: %i", (int)camera.speed);
+                ImGui::Text("Quadtree");
+                ImGui::SliderInt("Depth", &depth, 0, 10);
+                ImGui::Text("Point:");
+                ImGui::SliderFloat2("Point", &point.x, -octreeScale / 2, octreeScale / 2);
+                ImGui::SliderFloat2("Point1", &point1.x, -octreeScale / 2, octreeScale / 2);
                 ImGui::End();
             }
             ImGui::Render();
@@ -210,8 +238,21 @@ public:
             shader->setUniform(SE::MAT4F, "u_transformation", (void*)&mvp);
         }
 
-        DrawNodes(quadtree.root);
+        if (prevDepth != depth || prevPoint != point || prevPoint1 != point1)
+        {
+            quadtree.depth = depth;
+            prevDepth = depth;
 
+            prevPoint = point;
+            prevPoint1 = point1;
+            quadtree.root.DeleteChildNodes();
+            quadtree.Insert(point);
+            quadtree.Insert(point1);
+        }
+
+        DrawNodes(quadtree.root);
+        DrawPoint(point, { 1.0f, 0.0f, 1.0f });
+        DrawPoint(point1, { 0.0f, 1.0f, 0.0f });
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
@@ -226,24 +267,33 @@ public:
         }
         renderer.draw(*node.bs.va, 8, *shader.get(), SE::DrawMode::LINES);
     }
-    void DebugDrawNodes(Quadtree::Node& node, unsigned int depth)
+
+    void DrawPoint(glm::vec3 point, glm::vec3 color)
     {
-        std::cerr << "Depth: " << depth << "\tScale: " << node.scale << "\tX: " << node.position.x << " Y: " << node.position.x << std::endl;
-
-        if (node.childNodes != nullptr)
-        {
-            for (int i{}; i < 8; ++i)
-            {
-                DebugDrawNodes(*node.childNodes[i], depth - 1);
-            }
-        }
-        renderer.draw(*node.bs.va, 8, *shader.get(), SE::DrawMode::LINES);
+        float vertices[6]{
+            point.x, point.y, point.z, color.r, color.g, color.b
+        };
+        SE::VertexBuffer vb{ vertices, sizeof(vertices), SE::BufferUsage::STATIC_DRAW };
+        SE::VertexBufferLayout layout;
+        SE::VertexAttribute positions{ 3, SE::FLOAT };
+        SE::VertexAttribute colors{ 3, SE::FLOAT };
+        layout.add(positions);
+        layout.add(colors);
+        SE::VertexArray va;
+        va.add(vb, layout);
+        renderer.draw(va, 1, *shader.get(), SE::DrawMode::POINTS);
     }
-
 
     std::unique_ptr<SE::Shader> shader{ new SE::Shader{ "D:/Development/SandboxEngine/SandboxEngine/src/Graphics/shaders/primitive.vert", "D:/Development/SandboxEngine/SandboxEngine/src/Graphics/shaders/primitive.frag" } };
 
     bool cameraMode{ false };
-    SE::Camera camera{ glm::vec3(0, 0, 20), 10.0f };
-    Quadtree quadtree{ 10.0f, {0.0f, 0.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, 3 };
+    SE::Camera camera{ glm::vec3(0, 0, 200), 10.0f };
+    float octreeScale{ 100.0f };
+    int depth{ 5 };
+    int prevDepth{ depth };
+    Quadtree quadtree{ octreeScale, {0.0f, 0.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, depth };
+    glm::vec3 point{ 0.0f, 0.0f, 0.0f };
+    glm::vec3 prevPoint{ point };
+    glm::vec3 point1{ 1.0f, 1.0f, 0.0f };
+    glm::vec3 prevPoint1{ point };
 };
