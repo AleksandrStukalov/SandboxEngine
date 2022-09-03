@@ -10,7 +10,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-class QuadtreeApp : public SE::Application
+class TemplateApp : public SE::Application
 {
 public:
     void processKeyboard() override
@@ -28,8 +28,8 @@ public:
         if (cameraMode) camera.processScroll(offset);
     }
 
-    QuadtreeApp()
-        : Application("QuadtreeApp", 1920, 1080)
+    TemplateApp()
+        : Application("TemplateApp", 1920, 1080)
     {
 
         // Initializing ImGui:
@@ -47,7 +47,7 @@ public:
         }
     }
 
-    ~QuadtreeApp()
+    ~TemplateApp()
     {
         // Finalizing ImGui:
         {

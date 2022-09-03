@@ -1,10 +1,11 @@
 #pragma once
 
 #include "Quadtree.h"
+#include "Octree.h"
 
 int main()
 {
-    QuadtreeApp* app = new QuadtreeApp();
+    OctreeApp* app = new OctreeApp();
     app->update();
 
     delete app;

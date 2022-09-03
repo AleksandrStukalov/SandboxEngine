@@ -14,8 +14,9 @@
 
 struct BoundingSquare
 {
-    BoundingSquare(float scale, glm::vec3 originPos, glm::vec3 color)
+    BoundingSquare(float scale, glm::vec3 position, glm::vec3 color)
     {
+        glm::vec3 originPos{ position };// For readability
         float halfScale{ scale * 0.5f };
         float vertices[8 * 6] {
             originPos.x - halfScale , originPos.y - halfScale, originPos.z, color.r, color.g, color.b, // Bottom Left
