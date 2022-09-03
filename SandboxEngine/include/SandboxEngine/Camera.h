@@ -54,6 +54,7 @@ namespace SE
         inline void processScroll(float offset)
         {
             speed += offset;
+            if (speed < 0) speed = 0;
         }
 
         glm::vec3 position, front, up;

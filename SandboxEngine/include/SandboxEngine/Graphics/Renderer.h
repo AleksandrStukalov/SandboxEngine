@@ -32,8 +32,8 @@ namespace SE
         void viewport(int x, int y, int width, int height);
         void setPolygonMode(PolygonMode mode) const;
 
-        void SE::Renderer::draw(const SE::VertexArray& va, const unsigned int vertexCount, const Shader& shader, const Texture& texture, DrawMode mode = SE::DrawMode::TRIANGLES);
-        void SE::Renderer::draw(const SE::VertexArray& va, const IndexBuffer& ib, const Shader& shader, const Texture& texture, DrawMode mode = SE::DrawMode::TRIANGLES);
+        void SE::Renderer::draw(const SE::VertexArray& va, const unsigned int vertexCount, const SE::Shader& shader, DrawMode mode = SE::DrawMode::TRIANGLES);
+        void SE::Renderer::draw(const SE::VertexArray& va, const IndexBuffer& ib, const SE::Shader& shader, DrawMode mode = SE::DrawMode::TRIANGLES);
 
         unsigned int callCount{};
     };

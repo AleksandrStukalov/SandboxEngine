@@ -42,21 +42,19 @@ void SE::Renderer::setPolygonMode(PolygonMode mode) const
     }
 }
 
-void SE::Renderer::draw(const SE::VertexArray& va, const unsigned int vertexCount, const Shader& shader, const Texture& texture, DrawMode mode)
+void SE::Renderer::draw(const SE::VertexArray& va, const unsigned int vertexCount, const SE::Shader& shader, DrawMode mode)
 {
-    va.bind();
     shader.bind();
-    texture.bind();
+    va.bind();
     glDrawArrays(getPlatformDrawMode(mode), 0, vertexCount);
     ++callCount;
 }
 
-void SE::Renderer::draw(const SE::VertexArray& va, const IndexBuffer& ib, const Shader& shader, const Texture& texture, DrawMode mode)
+void SE::Renderer::draw(const SE::VertexArray& va, const IndexBuffer& ib, const SE::Shader& shader, DrawMode mode)
 {
     shader.bind();
     va.bind();
     ib.bind();
-    texture.bind();
     glDrawElements(getPlatformDrawMode(mode), ib.indexCount, getPlatformType(ib.type), 0);
     ++callCount;
 }
