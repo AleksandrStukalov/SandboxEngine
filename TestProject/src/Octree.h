@@ -120,42 +120,115 @@ struct Octree
 {
     Octree(const float scale, const glm::vec3 position, const glm::vec3 color, const unsigned int depth)
         : root(scale, position, color), depth(depth) {}
-    
+
+    void Insert(glm::vec3 point)
+    {
+        root.Subdivide(point, depth);
+    }
+
     enum Indices : unsigned int
     {
-        BottomLeftFront = 0,     // 000
-        BottomLeftBack = 1,      // 001
-        BottomRightFront = 2,    // 010
-        BottomRightBack = 3,     // 011
-        TopLeftFront = 4,        // 100
-        TopLeftBack = 5,         // 101
-        TopRightFront = 6,       // 110
-        TopRightBack = 7         // 111
+        BottomLeftFront = 0b000,
+        BottomLeftBack = 0b001,
+        BottomRightFront = 0b010,
+        BottomRightBack = 0b011,
+        TopLeftFront = 0b100,
+        TopLeftBack = 0b101,
+        TopRightFront = 0b110,
+        TopRightBack = 0b111
 
         // NOTE: What each bit represents whether node is at the:
         // * Right bit -> front(0) or back(1)
         // * Middle bit -> left(0) or right(1)
         // * Left bit -> bottom(0) or top(1)
-
-        // TODO: Try to make the same thing using values with 0b prefix
     };
     struct Node
     {
         Node(const float scale, const glm::vec3 position, const glm::vec3 color)
             : scale(scale), position(position), color(color), bb(scale, position, color) {}
 
-        void Subdivide(unsigned int depth)
+        void Subdivide(glm::vec3 point, unsigned int depth)
         {
             if (depth > 0)
             {
-                if (this->childNodes == nullptr) {
+                unsigned int childIndex{ GetPositionIndex(point) };
+
+                if (this->childNodes == nullptr) 
+                {
                     // Initializing childNodes:
                     this->childNodes = new Node* [8];
-                    for (int i{}; i < 8; ++i)
-                    {
-                        
-                    }
+                    this->childNodes[BottomLeftFront] = new Node{ this->scale * 0.5f, {
+                            this->position.x - this->scale * 0.25f,
+                            this->position.y - this->scale * 0.25f,
+                            this->position.z + this->scale * 0.25f,
+                        }, this->color - 0.15f };
+                    this->childNodes[BottomLeftBack] = new Node{ this->scale * 0.5f, {
+                            this->position.x - this->scale * 0.25f,
+                            this->position.y - this->scale * 0.25f,
+                            this->position.z - this->scale * 0.25f,
+                        }, this->color - 0.15f };
+                    this->childNodes[BottomRightFront] = new Node{ this->scale * 0.5f, {
+                            this->position.x + this->scale * 0.25f,
+                            this->position.y - this->scale * 0.25f,
+                            this->position.z + this->scale * 0.25f,
+                        }, this->color - 0.15f };
+                    this->childNodes[BottomRightBack] = new Node{ this->scale * 0.5f, {
+                            this->position.x + this->scale * 0.25f,
+                            this->position.y - this->scale * 0.25f,
+                            this->position.z - this->scale * 0.25f,
+                        }, this->color - 0.15f };
+                    this->childNodes[TopLeftFront] = new Node{ this->scale * 0.5f, {
+                            this->position.x - this->scale * 0.25f,
+                            this->position.y + this->scale * 0.25f,
+                            this->position.z + this->scale * 0.25f,
+                        }, this->color - 0.15f };
+                    this->childNodes[TopLeftBack] = new Node{ this->scale * 0.5f, {
+                            this->position.x - this->scale * 0.25f,
+                            this->position.y + this->scale * 0.25f,
+                            this->position.z - this->scale * 0.25f,
+                        }, this->color - 0.15f };
+                    this->childNodes[TopRightFront] = new Node{ this->scale * 0.5f, {
+                            this->position.x + this->scale * 0.25f,
+                            this->position.y + this->scale * 0.25f,
+                            this->position.z + this->scale * 0.25f,
+                        }, this->color - 0.15f };
+                    this->childNodes[TopRightBack] = new Node{ this->scale * 0.5f, {
+                            this->position.x + this->scale * 0.25f,
+                            this->position.y + this->scale * 0.25f,
+                            this->position.z - this->scale * 0.25f,
+                        }, this->color - 0.15f };
                 }
+
+                this->childNodes[childIndex]->Subdivide(point, depth - 1);
+            }
+        }
+        // Gets index of the child node, in which given point is located
+        unsigned int GetPositionIndex(glm::vec3 point)
+        {
+            unsigned int index{ 0b000 };
+
+            // Front or Back:
+            index |= point.z > this->position.z ? 0b000 : 0b001;
+            // Left or Right:
+            index |= point.x < this->position.x ? 0b000 : 0b010;
+            // Bottom or Top:
+            index |= point.y < this->position.y ? 0b000 : 0b100;
+
+            return index;
+        }
+
+        void DeleteChildNodes()
+        {
+            if (this->childNodes != nullptr)
+            {
+                for (int i{}; i < 8; ++i)
+                {
+                    delete this->childNodes[i];
+                    this->childNodes[i] = nullptr;
+                }
+
+                delete this->childNodes;
+                this->childNodes = nullptr;
             }
         }
 
@@ -163,7 +236,7 @@ struct Octree
         glm::vec3 position;
         glm::vec3 color;
         BoundingBox bb;
-        Node** childNodes;
+        Node** childNodes{ nullptr };// Must be initialized with nullptr
     };
 
     Node root;
@@ -191,6 +264,8 @@ public:
     OctreeApp()
         : Application("OctreeApp", 1920, 1080)
     {
+        octree.Insert(point1);
+        octree.Insert(point2);
         // Initializing ImGui:
         {
             // Setting up ImGui context:
@@ -238,12 +313,17 @@ public:
                 ImGui::Text("   Press 'C' to toggle camera mode");
                 ImGui::Text("   Scroll to adjust speed");
                 ImGui::Text("   Speed: %i", (int)camera.speed);
+                ImGui::Text("Octree:");
+                ImGui::SliderInt("Depth", &octreeDepth, 0, 10);
+                ImGui::Text("Points:");
+                ImGui::SliderFloat3("Point1", &point1.x, -octreeScale * 0.5, octreeScale * 0.5);
+                ImGui::SliderFloat3("Point2", &point2.x, -octreeScale * 0.5, octreeScale * 0.5);
                 ImGui::End();
             }
             ImGui::Render();
         }
 
-        // Transforming & Rendering:
+        // Transforming:
         {
             // Translation:
             glm::mat4 view = camera.getViewMatrix();
@@ -253,14 +333,63 @@ public:
             shader->setUniform(SE::MAT4F, "u_transformation", (void*)&mvp);
         }
 
-        BoundingBox bb{ 1.0f, {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f} };
-        renderer.draw(*bb.va, 48, *shader.get(), SE::DrawMode::LINES);
+        // Rendering:
+        if (prevOctreeDepth != octreeDepth || prevPoint1 != point1 || prevPoint2 != point2)
+        {
+            octree.root.DeleteChildNodes();
+            prevOctreeDepth = octreeDepth;
+            octree.depth = octreeDepth;
+            prevPoint1 = point1;
+            octree.Insert(point1);
+            prevPoint2 = point2;
+            octree.Insert(point2);
+        }
+
+        DrawNodes(octree.root);
+        DrawPoint(point1, { 0.5, 0.2, 0.7 });
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
-    std::unique_ptr<SE::Shader> shader{ new SE::Shader{ "D:/Development/SandboxEngine/SandboxEngine/src/Graphics/shaders/primitive.vert", "D:/Development/SandboxEngine/SandboxEngine/src/Graphics/shaders/primitive.frag" } };
+    void DrawNodes(Octree::Node& node)
+    {
+        if (node.childNodes != nullptr)
+        {
+            for (int i{}; i < 8; ++i)
+            {
+                DrawNodes(*node.childNodes[i]);
+            }
+        }
+        renderer.draw(*node.bb.va, 48, *shader.get(), SE::DrawMode::LINES);
+    }
+    void DrawPoint(glm::vec3 point, glm::vec3 color)
+    {
+        float vertices[6]{
+            point.x, point.y, point.z, color.r, color.g, color.b
+        };
+        SE::VertexBuffer vb{ vertices, sizeof(vertices), SE::BufferUsage::STATIC_DRAW };
+        SE::VertexBufferLayout layout;
+        SE::VertexAttribute positions{ 3, SE::FLOAT };
+        SE::VertexAttribute colors{ 3, SE::FLOAT };
+        layout.add(positions);
+        layout.add(colors);
+        SE::VertexArray va;
+        va.add(vb, layout);
+        renderer.draw(va, 1, *shader.get(), SE::DrawMode::POINTS);
+    }
 
+    std::unique_ptr<SE::Shader> shader{ new SE::Shader{ "D:/Development/SandboxEngine/SandboxEngine/src/Graphics/shaders/primitive.vert", "D:/Development/SandboxEngine/SandboxEngine/src/Graphics/shaders/primitive.frag" } };
     bool cameraMode{ false };
-    SE::Camera camera{ glm::vec3(0, 0, 5), 1.0f };
+    SE::Camera camera{ glm::vec3(0, 0, 20), 1.0f };
+    
+    float octreeScale{ 10.0f };
+    int octreeDepth{ 5 };
+    int prevOctreeDepth{ octreeDepth };
+    Octree octree{ octreeScale, {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 0.0f}, octreeDepth };
+
+    glm::vec3 point1{ 1.0f, 1.0f, 1.0f };
+    glm::vec3 prevPoint1{ point1 };
+
+    glm::vec3 point2{ -1.0f, -1.0f, -1.0f };
+    glm::vec3 prevPoint2{ point2 };
 };

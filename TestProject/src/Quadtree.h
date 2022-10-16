@@ -85,49 +85,22 @@ struct Quadtree
                 {
                     // Initializing childNodes:
                     this->childNodes = new Node* [4];
-                    /*for (int i{}; i < 4; ++i)
-                    {
-                        // Getting position:
-                        glm::vec3 childPos = this->position;
-                        if ((i & 2) == 2) childPos.y -= this->scale * 0.25f; // If on bottom
-                        else              childPos.y += this->scale * 0.25f; // If on top
-
-                        if ((i & 1) == 1) childPos.x += this->scale * 0.25f; // If on right
-                        else              childPos.x -= this->scale * 0.25f; // If on left
-
-                        childPos.z = this->position.z - 0.2;
-
-                        // Getting color:
-                        glm::vec3 childColor{
-                            this->color.r - 0.15,
-                            this->color.g - 0.15,
-                            this->color.b - 0.15,
-                        };
-
-                        childNodes[i] = new Node(this->scale * 0.5f, childPos, childColor);
-                    }*/
-
-                    glm::vec3 childColor{
-                        this->color.x - 0.15,
-                        this->color.y - 0.15,
-                        this->color.z - 0.15,
-                    };
                     this->childNodes[TopLeft] = new Node{ this->scale * 0.5f, {
                         this->position.x - this->scale * 0.25f,
                         this->position.y + this->scale * 0.25f,
-                        this->position.z }, childColor };
+                        this->position.z }, this->color - 0.15f };
                     this->childNodes[TopRight] = new Node{ this->scale * 0.5f, {
                         this->position.x + this->scale * 0.25f,
                         this->position.y + this->scale * 0.25f,
-                        this->position.z }, childColor };
+                        this->position.z }, this->color - 0.15f };
                     this->childNodes[BottomLeft] = new Node{ this->scale * 0.5f, {
                         this->position.x - this->scale * 0.25f,
                         this->position.y - this->scale * 0.25f,
-                        this->position.z }, childColor };
+                        this->position.z }, this->color - 0.15f };
                     this->childNodes[BottomRight] = new Node{ this->scale * 0.5f, {
                         this->position.x + this->scale * 0.25f,
                         this->position.y - this->scale * 0.25f,
-                        this->position.z }, childColor };
+                        this->position.z }, this->color - 0.15f };
 
                 }
 
