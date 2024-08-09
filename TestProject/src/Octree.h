@@ -262,7 +262,7 @@ public:
     }
 
     OctreeApp()
-        : Application("OctreeApp", 1920, 1080)
+        : Application("OctreeApp")
     {
         octree.Insert(point1);
         octree.Insert(point2);

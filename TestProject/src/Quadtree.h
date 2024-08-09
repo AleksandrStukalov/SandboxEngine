@@ -165,7 +165,7 @@ public:
     }
 
     QuadtreeApp()
-        : Application("QuadtreeApp", 1920, 1080)
+        : Application("QuadtreeApp")
     {
         quadtree.Insert(point);
         

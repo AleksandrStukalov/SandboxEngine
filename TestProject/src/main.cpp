@@ -4,6 +4,7 @@
 #include "Octree.h"
 #include <filesystem>
 
+
 int main(int argc, const char** argv)
 {
 	std::filesystem::current_path("../../");

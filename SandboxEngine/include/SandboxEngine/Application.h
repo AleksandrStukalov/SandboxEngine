@@ -9,7 +9,7 @@ namespace SE
     class Application
     {
     public:
-        inline Application(const char* title = "Application", const unsigned int width = 800, const unsigned int height = 600)
+        inline Application(const char* title = "Application", const unsigned int width = 1280, const unsigned int height = 720)
             : window(title, width, height), events(*this) {}
         inline void update()
         {
