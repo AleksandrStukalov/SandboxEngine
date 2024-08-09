@@ -39,7 +39,7 @@ add_library(${ENGINE_NAME}
 source_group("src" FILES  ${SRC})
 source_group("include" FILES  ${INCLUDE})
 
-target_compile_features(${ENGINE_NAME} PUBLIC cxx_std_17)
+target_compile_features(${ENGINE_NAME} PUBLIC cxx_std_20)
 
 target_compile_options(${ENGINE_NAME} PRIVATE "/W0")
 
@@ -77,6 +77,9 @@ target_precompile_headers(${ENGINE_NAME}
         [["Graphics/Types.h"]]
         
         # NOTE: 
-        # Header file names specified with angle brackets (e.g. <unordered_map>) or explicit double quotes, e.g. [["other_header.h"]]) will be treated as is,  and include directories must be available for the compiler to find them. 
+        # Header file names specified with angle brackets (e.g. <unordered_map>) or explicit double quotes, e.g. [["other_header.h"]]) will be treated as is, and include directories must be available for the compiler to find them. 
         # Other header file names (e.g. project_header.h) are interpreted as being relative to the current source directory (e.g. CMAKE_CURRENT_SOURCE_DIR) and will be included by absolute path. 
 )
+
+message(STATUS "SRC: ${SRC}")
+message(STATUS "INCLUDE: ${INCLUDE}")

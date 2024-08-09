@@ -30,7 +30,7 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
 endif()
 
 if(NOT EXISTS "${PROJECT_SOURCE_DIR}/SandboxEngine/dependencies/glfw/CMakeLists.txt")
-    message(FATAL_ERROR "The submodules were not downloaded. GIT_SUBMODULE was turned or failed. Please update submodules and try again.")
+    message(FATAL_ERROR "The submodules were not downloaded. Please, update submodules and try again.")
 endif()
 
 add_subdirectory("SandboxEngine/dependencies/glfw")
