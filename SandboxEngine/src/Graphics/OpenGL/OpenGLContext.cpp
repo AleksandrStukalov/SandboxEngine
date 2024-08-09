@@ -1,5 +1,7 @@
-#include "D:/Development/SandboxEngine/SandboxEngine/CMakeFiles/SandboxEngine.dir/Debug/cmake_pch.hxx"
 #include "OpenGLContext.h"
+#include "Log.h"
+#include "Window/Input.h"
+#include "Graphics/Types.h"
 
 #include <glad/glad.h>
 

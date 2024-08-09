@@ -215,7 +215,9 @@ public:
                 ImGui::Text("   Scroll to adjust speed");
                 ImGui::Text("   Speed: %i", (int)camera.speed);
                 ImGui::Text("Quadtree");
-                ImGui::SliderInt("Depth", &depth, 0, 10);
+				int tmpdepth = depth;
+                ImGui::SliderInt("Depth", &tmpdepth, 0, 10); // TODO: Remove crutch
+				depth = tmpdepth;
                 ImGui::Text("Point:");
                 ImGui::SliderFloat2("Point", &point.x, -octreeScale / 2, octreeScale / 2);
                 ImGui::SliderFloat2("Point1", &point1.x, -octreeScale / 2, octreeScale / 2);
@@ -282,13 +284,13 @@ public:
         renderer.draw(va, 1, *shader.get(), SE::DrawMode::POINTS);
     }
 
-    std::unique_ptr<SE::Shader> shader{ new SE::Shader{ "D:/Development/SandboxEngine/SandboxEngine/src/Graphics/shaders/primitive.vert", "D:/Development/SandboxEngine/SandboxEngine/src/Graphics/shaders/primitive.frag" } };
+    std::unique_ptr<SE::Shader> shader{ new SE::Shader{ "../SandboxEngine/src/Graphics/shaders/primitive.vert", "../SandboxEngine/src/Graphics/shaders/primitive.frag" } };
 
     bool cameraMode{ false };
     SE::Camera camera{ glm::vec3(0, 0, 200), 10.0f };
     float octreeScale{ 100.0f };
-    int depth{ 5 };
-    int prevDepth{ depth };
+    unsigned int depth{ 5 };
+    unsigned int prevDepth{ depth };
     Quadtree quadtree{ octreeScale, {0.0f, 0.0f, 0.0f }, {1.0f, 0.0f, 0.0f}, depth };
     glm::vec3 point{ 0.0f, 0.0f, 0.0f };
     glm::vec3 prevPoint{ point };
