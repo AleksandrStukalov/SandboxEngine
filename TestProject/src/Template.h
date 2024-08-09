@@ -97,7 +97,7 @@ public:
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
-    std::unique_ptr<SE::Shader> shader{ new SE::Shader{ "D:/Development/SandboxEngine/SandboxEngine/src/Graphics/shaders/primitive.vert", "D:/Development/SandboxEngine/SandboxEngine/src/Graphics/shaders/primitive.frag" } };
+    std::unique_ptr<SE::Shader> shader{ new SE::Shader{ "../SandboxEngine/src/Graphics/shaders/primitive.vert", "../SandboxEngine/src/Graphics/shaders/primitive.frag" } };
 
     bool cameraMode{ false };
     SE::Camera camera{ glm::vec3(0, 0, 5), 1.0f };

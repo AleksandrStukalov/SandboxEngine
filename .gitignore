@@ -30,3 +30,6 @@ TestProject/cmake_install.cmake
 TestProject/imgui.ini
 bin/
 cmake_install.cmake
+
+!Build/.gitkeep
+Build/*

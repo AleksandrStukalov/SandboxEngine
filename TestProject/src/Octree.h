@@ -380,7 +380,7 @@ public:
         renderer.draw(va, 1, *shader.get(), SE::DrawMode::POINTS);
     }
 
-    std::unique_ptr<SE::Shader> shader{ new SE::Shader{ "../SandboxEngine/src/Graphics/shaders/primitive.vert","../SandboxEngine/src/Graphics/shaders/primitive.frag"}};
+    std::unique_ptr<SE::Shader> shader{ new SE::Shader{ "SandboxEngine/src/Graphics/shaders/primitive.vert","SandboxEngine/src/Graphics/shaders/primitive.frag"}};
     bool cameraMode{ false };
     SE::Camera camera{ glm::vec3(0, 0, 20), 1.0f };
     
